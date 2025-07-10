@@ -2,6 +2,23 @@
 #ifndef DEFS_H
 #define DEFS_H
 
+#include <stdlib.h>
+
+//Debugging pointer
+// #define DEBUG
+// #ifndef DEBUG
+// #define ASSERT (n)
+// #else
+// #define ASSERT (n) \
+// if(!(n)) { \
+//     printf("%s - Failed", #n); \
+//     printf("On %s ", __DATE__); \
+//     printf("At %s ", __TIME__); \
+//     printf("In File %s ", __FILE__); \
+//     printf("At Line %d\n", __LINE__); \
+//     exit(1); }
+// #endif
+
 typedef unsigned long long U64;
 
 #define NAME "Mystery"
@@ -64,20 +81,26 @@ typedef struct S_BOARD {
 
     S_UNDO history[MAXGAMEMOVES];
 
+    //Piece List (Maximum 10 pieces for a piece set like pawn) - https://chatgpt.com/s/t_686fd9f539fc8191b87e12cf9425a46b
+    int pList[13][10];
+
 } S_BOARD;
 
 /* MACROS */
 #define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
+#define SQ64(sq120) Sq120ToSq64[sq120]
 
 /* GLOBALS */
 extern int Sq120ToSq64 [BRD_SQ_NUM];
 extern int Sq64ToSq120 [64];
 
 /* FUNCTIONS */
-extern void AllInit();
 
 // init.c
+extern void AllInit();
 
+// bitboard.c
+extern void PrintBitBoard(U64 bb);
 
 
 #endif
