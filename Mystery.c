@@ -5,6 +5,8 @@
 int main() {
     AllInit();
 
+
+    //Debugging (For viewing chess board position for 10x12 and 8x8)
     int index = 0;
 
     for (index = 0; index < BRD_SQ_NUM; ++index) {
@@ -19,6 +21,8 @@ int main() {
         if (index % 8 == 0) printf("\n");
         printf("%5d", Sq64ToSq120[index]);
     }
+
+    printf("\n");
 
     return 0;
 }
