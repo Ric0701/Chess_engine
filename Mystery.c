@@ -4,6 +4,18 @@
 int main() {
     AllInit();
 
+    U64 playBitBoard = 0ULL;
+
+    playBitBoard |= (1ULL << SQ64(D2));
+    playBitBoard |= (1ULL << SQ64(G6));
+    playBitBoard |= (1ULL << SQ64(H1));
+
+    int sq64 = 0;
+    while (playBitBoard) {
+        sq64 = POP(&playBitBoard);
+        printf("Popped: %d\n", sq64);
+        PrintBitBoard(playBitBoard);
+    }
     
     return 0;
 }
