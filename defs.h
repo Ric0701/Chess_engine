@@ -4,20 +4,20 @@
 
 #include <stdlib.h>
 
-//Debugging pointer
-// #define DEBUG
-// #ifndef DEBUG
-// #define ASSERT (n)
-// #else
-// #define ASSERT (n) \
-// if(!(n)) { \
-//     printf("%s - Failed", #n); \
-//     printf("On %s ", __DATE__); \
-//     printf("At %s ", __TIME__); \
-//     printf("In File %s ", __FILE__); \
-//     printf("At Line %d\n", __LINE__); \
-//     exit(1); }
-// #endif
+// Debugging pointer
+#define DEBUG
+#ifdef DEBUG
+#define ASSERT(n) \
+if(!(n)) { \
+    printf("%s - Failed", #n); \
+    printf("On %s ", __DATE__); \
+    printf("At %s ", __TIME__); \
+    printf("In File %s ", __FILE__); \
+    printf("At Line %d\n", __LINE__); \
+    exit(1); }
+#else
+#define ASSERT(n)
+#endif
 
 typedef unsigned long long U64;
 
@@ -84,27 +84,41 @@ typedef struct S_BOARD {
     //Piece List (Maximum 10 pieces for a piece set like pawn) - https://chatgpt.com/s/t_686fd9f539fc8191b87e12cf9425a46b
     int pList[13][10];
 
+    int castlePerm;
+
 } S_BOARD;
+
 
 /* MACROS */
 #define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
 #define SQ64(sq120) Sq120ToSq64[sq120]
 #define POP(b) PopBit(b)
 #define CNT(b) CountBits(b)
+#define SETBIT(bb, sq) ((bb) |= SetMask[(sq)])
+#define CLRBIT(bb, sq) ((bb) &= ClearMask[(sq)])
+
 
 /* GLOBALS */
 extern int Sq120ToSq64 [BRD_SQ_NUM];
 extern int Sq64ToSq120 [64];
+extern U64 SetMask[64];
+extern U64 ClearMask[64];
+extern U64 PieceKeys[13][120];
+extern U64 SideKey;
+extern U64 CastleKeys[16];
+
 
 /* FUNCTIONS */
-
 // init.c
 extern void AllInit();
+
 
 // bitboard.c
 extern void PrintBitBoard(U64 bb);
 extern int PopBit(U64 *bb);
 extern int CountBits(U64 b);
 
+// hashKeys.c
+extern U64 GeneratePosKey(const S_BOARD *pos);
 
 #endif

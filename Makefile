@@ -5,7 +5,7 @@ CC = gcc
 TARGET = Mystery.exe
 
 # Source files
-SRC = Mystery.c init.c bitboard.c
+SRC = Mystery.c init.c bitboard.c hashKeys.c
 
 # Performance tuning
 PERF = -O2
