@@ -47,7 +47,7 @@ enum {
 
 enum { FALSE, TRUE };
 
-//Castling definitions
+//Castling definitions: https://chatgpt.com/s/t_68766f6682b48191a9f2afe339975026
 enum { WKCA = 1, WQCA = 2, BKCA = 4, BQCA = 8 };
 
 typedef struct S_UNDO {
@@ -109,6 +109,10 @@ extern U64 ClearMask[64];
 extern U64 PieceKeys[13][120];
 extern U64 SideKey;
 extern U64 CastleKeys[16];
+extern char PceChar[];
+extern char SideChar[];
+extern char RankChar[];
+extern char FileChar[];
 
 
 /* FUNCTIONS */
@@ -126,5 +130,8 @@ extern U64 GeneratePosKey(const S_BOARD *pos);
 
 // board.c
 extern void ResetBoard(S_BOARD *pos);
+extern int Parse_FEN(char *fen, S_BOARD *pos);
+extern void PrintBoard(const S_BOARD *pos);
+extern void PrintBoard(const S_BOARD *pos);
 
 #endif

@@ -1,33 +1,23 @@
-//https://www.youtube.com/watch?v=GmCxU4elNcA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=16
+//https://www.youtube.com/watch?v=clLaVOnvUvA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=18
 #include "defs.h"
+
+#define FEN1 "r5k1/2pq2p1/ppn4p/2p1p3/2P5/2NPP1P1/PP4KP/1R3Q2 b - - 0 21"
+#define FEN2 "4q1k1/2p3p1/pp5p/2p1n3/2P1P3/2N1P1P1/PP2Q2P/5K2 b - - 0 26"
+#define FEN3 "8/6p1/pp5p/2p1kP2/4P1P1/5K2/P6P/8 w - - 0 41"
 
 int main() {
     AllInit();
 
-    int Piece1 = rand();
-    int Piece2 = rand();
-    int Piece3 = rand();
-    int Piece4 = rand();
+    S_BOARD board[1];
 
-    printf("Piece 1: %X\n", Piece1);
-    printf("Piece 2: %X\n", Piece2);
-    printf("Piece 3: %X\n", Piece3);
-    printf("Piece 4: %X\n", Piece4);
-
-    int key = Piece1 ^ Piece2 ^ Piece3 ^ Piece4;
-    int TempKey = Piece2;
-    TempKey ^= Piece3;
-    TempKey ^= Piece4;
-    TempKey ^= Piece1;
-
-    printf("Key: %X\n", key);
-    printf("TempKey: %X\n", TempKey);
-
-    TempKey ^= Piece3;
-    printf("(Three out) TempKey: %X\n", TempKey);
-
-    TempKey ^= Piece3;
-    printf("(Three in again) TempKey: %X\n", TempKey);
+    Parse_FEN(START_FEN, board);
+    PrintBoard(board);
+    Parse_FEN(FEN1, board);
+    PrintBoard(board);
+    Parse_FEN(FEN2, board);
+    PrintBoard(board);
+    Parse_FEN(FEN3, board);
+    PrintBoard(board);
 
     return 0;
 }
@@ -79,3 +69,29 @@ int main() {
     
     // CLRBIT(playBitBoard, 61);
     // PrintBitBoard(playBitBoard);
+
+
+    // int Piece1 = rand();
+    // int Piece2 = rand();
+    // int Piece3 = rand();
+    // int Piece4 = rand();
+
+    // printf("Piece 1: %X\n", Piece1);
+    // printf("Piece 2: %X\n", Piece2);
+    // printf("Piece 3: %X\n", Piece3);
+    // printf("Piece 4: %X\n", Piece4);
+
+    // int key = Piece1 ^ Piece2 ^ Piece3 ^ Piece4;
+    // int TempKey = Piece2;
+    // TempKey ^= Piece3;
+    // TempKey ^= Piece4;
+    // TempKey ^= Piece1;
+
+    // printf("Key: %X\n", key);
+    // printf("TempKey: %X\n", TempKey);
+
+    // TempKey ^= Piece3;
+    // printf("(Three out) TempKey: %X\n", TempKey);
+
+    // TempKey ^= Piece3;
+    // printf("(Three in again) TempKey: %X\n", TempKey);
