@@ -1,23 +1,34 @@
 //https://www.youtube.com/watch?v=clLaVOnvUvA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=18
+
+//Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
 
 #define FEN1 "r5k1/2pq2p1/ppn4p/2p1p3/2P5/2NPP1P1/PP4KP/1R3Q2 b - - 0 21"
 #define FEN2 "4q1k1/2p3p1/pp5p/2p1n3/2P1P3/2N1P1P1/PP2Q2P/5K2 b - - 0 26"
 #define FEN3 "8/6p1/pp5p/2p1kP2/4P1P1/5K2/P6P/8 w - - 0 41"
+#define FEN4 "r3qrk1/ppp5/3p2n1/3Pp1Q1/4n3/2PN4/P1P3PP/R4RK1 w - - 0 21"
 
 int main() {
     AllInit();
 
     S_BOARD board[1];
 
-    Parse_FEN(START_FEN, board);
+    // Parse_FEN(START_FEN, board);
+    // PrintBoard(board);
+    // Parse_FEN(FEN1, board);
+    // PrintBoard(board);
+    // Parse_FEN(FEN2, board);
+    // PrintBoard(board);
+    Parse_FEN(FEN4, board);
+
     PrintBoard(board);
-    Parse_FEN(FEN1, board);
-    PrintBoard(board);
-    Parse_FEN(FEN2, board);
-    PrintBoard(board);
-    Parse_FEN(FEN3, board);
-    PrintBoard(board);
+
+    ASSERT(CheckBoard(board));
+
+    printf("\nForced assesrts to damage: \n");
+
+    board -> posKey ^= SideKey;
+    ASSERT(CheckBoard(board));
 
     return 0;
 }
@@ -95,3 +106,12 @@ int main() {
 
     // TempKey ^= Piece3;
     // printf("(Three in again) TempKey: %X\n", TempKey);
+
+
+
+    // printf("\nwP: \n");
+    // PrintBitBoard(board -> pawns[WHITE]);
+    // printf("\nbP: \n");
+    // PrintBitBoard(board -> pawns[BLACK]);
+    // printf("\nall Pawns: \n");
+    // PrintBitBoard(board -> pawns[BOTH]);
