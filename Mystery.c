@@ -1,4 +1,4 @@
-//https://www.youtube.com/watch?v=PGPdT9zz-xg&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=21
+//https://www.youtube.com/watch?v=KQcArvyrbIo&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=24 Chapter: 24
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -7,28 +7,45 @@
 #define FEN2 "4q1k1/2p3p1/pp5p/2p1n3/2P1P3/2N1P1P1/PP2Q2P/5K2 b - - 0 26"
 #define FEN3 "8/6p1/pp5p/2p1kP2/4P1P1/5K2/P6P/8 w - - 0 41"
 #define FEN4 "r3qrk1/ppp5/3p2n1/3Pp1Q1/4n3/2PN4/P1P3PP/R4RK1 w - - 0 21"
+#define FEN5 "8/8/3q4/8/8/3Q4/8/8 w HAha - 0 1"
+#define FEN6 "2k5/8/3q4/4pK2/2P5/3Q4/8/8 w - - 0 1"
+
+void ShowSqAtBySide(const int side, const S_BOARD *pos) {
+    int rank = 6; int file = 0; int sq = 0; 
+    printf("\n\nSquares attacked by:%c\n",SideChar[side]);
+    for (rank = RANK_8; rank >= RANK_1; --rank) {
+        for (file = FILE_A; file <= FILE_H; ++file) {
+            sq = FR2SQ(file, rank);
+            if (SqAttacked(sq, side, pos) == TRUE) {
+                printf("x");
+            } else {
+                printf("-");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+}
 
 int main() {
     AllInit();
 
     S_BOARD board[1];
 
-    // Parse_FEN(START_FEN, board);
-    // PrintBoard(board);
-    // Parse_FEN(FEN1, board);
-    // PrintBoard(board);
-    // Parse_FEN(FEN2, board);
-    // PrintBoard(board);
-    Parse_FEN(FEN4, board);
+    Parse_FEN(FEN6, board);
 
     PrintBoard(board);
 
-    ASSERT(CheckBoard(board));
+    // ASSERT(CheckBoard(board));
 
-    printf("\nForced assesrts to damage: \n");
+    printf("\n\nWhite Attacking \n");
+    ShowSqAtBySide(WHITE, board);
 
-    board -> posKey ^= SideKey;
-    ASSERT(CheckBoard(board));
+    printf("\n\nBlack Attacking \n");
+    ShowSqAtBySide(BLACK, board);
+
+    // board -> posKey ^= SideKey;
+    // ASSERT(CheckBoard(board));
 
     return 0;
 }
