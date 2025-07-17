@@ -1,4 +1,4 @@
-//https://www.youtube.com/watch?v=clLaVOnvUvA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=18
+//https://www.youtube.com/watch?v=PGPdT9zz-xg&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=21
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -77,7 +77,7 @@ int main() {
 
     // SETBIT(playBitBoard, 61);
     // PrintBitBoard(playBitBoard);
-    
+
     // CLRBIT(playBitBoard, 61);
     // PrintBitBoard(playBitBoard);
 
