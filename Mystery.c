@@ -1,5 +1,5 @@
-//https://www.youtube.com/watch?v=8LUkqaodUFA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=31
-//Chapter: 31
+//https://www.youtube.com/watch?v=dkHlnSP3u3w&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=34
+//Chapter: 34
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -13,22 +13,24 @@
 #define FEN7 "2k4n/6P1/8/8/8/8/8/2K5 w - - 0 1"
 #define FEN_W "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1"
 #define FEN_B "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1"
-
+#define Knight_W "5k2/1n6/4n3/6N1/8/3N4/8/5K2 w - - 0 1"
+#define Knight_B "5k2/1n6/4n3/6N1/8/3N4/8/5K2 b - - 0 1"
 
 
 int main() {
     AllInit();
 
     S_BOARD board[1];
+    S_MOVELIST list[1];
 
-    Parse_FEN(FEN_W, board);
+    Parse_FEN(Knight_W, board);
     PrintBoard(board);
 
-    S_MOVELIST list[1];
+    // S_MOVELIST list[1];
 
     GenerateAllMoves(board, list);
 
-    PrintMoveList(list);
+    // PrintMoveList(list);
 
     return 0;
 }
