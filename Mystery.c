@@ -1,4 +1,5 @@
-//https://www.youtube.com/watch?v=KQcArvyrbIo&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=24 Chapter: 24
+//https://www.youtube.com/watch?v=8LUkqaodUFA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=31
+//Chapter: 31
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -9,43 +10,25 @@
 #define FEN4 "r3qrk1/ppp5/3p2n1/3Pp1Q1/4n3/2PN4/P1P3PP/R4RK1 w - - 0 21"
 #define FEN5 "8/8/3q4/8/8/3Q4/8/8 w HAha - 0 1"
 #define FEN6 "2k5/8/3q4/4pK2/2P5/3Q4/8/8 w - - 0 1"
+#define FEN7 "2k4n/6P1/8/8/8/8/8/2K5 w - - 0 1"
+#define FEN_W "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1"
+#define FEN_B "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1"
 
-void ShowSqAtBySide(const int side, const S_BOARD *pos) {
-    int rank = 6; int file = 0; int sq = 0; 
-    printf("\n\nSquares attacked by:%c\n",SideChar[side]);
-    for (rank = RANK_8; rank >= RANK_1; --rank) {
-        for (file = FILE_A; file <= FILE_H; ++file) {
-            sq = FR2SQ(file, rank);
-            if (SqAttacked(sq, side, pos) == TRUE) {
-                printf("x");
-            } else {
-                printf("-");
-            }
-        }
-        printf("\n");
-    }
-    printf("\n\n");
-}
+
 
 int main() {
     AllInit();
 
     S_BOARD board[1];
 
-    Parse_FEN(FEN6, board);
-
+    Parse_FEN(FEN_W, board);
     PrintBoard(board);
 
-    // ASSERT(CheckBoard(board));
+    S_MOVELIST list[1];
 
-    printf("\n\nWhite Attacking \n");
-    ShowSqAtBySide(WHITE, board);
+    GenerateAllMoves(board, list);
 
-    printf("\n\nBlack Attacking \n");
-    ShowSqAtBySide(BLACK, board);
-
-    // board -> posKey ^= SideKey;
-    // ASSERT(CheckBoard(board));
+    PrintMoveList(list);
 
     return 0;
 }
@@ -132,3 +115,57 @@ int main() {
     // PrintBitBoard(board -> pawns[BLACK]);
     // printf("\nall Pawns: \n");
     // PrintBitBoard(board -> pawns[BOTH]);
+
+
+
+    // void ShowSqAtBySide(const int side, const S_BOARD *pos) {
+    //     int rank = 6; int file = 0; int sq = 0; 
+    //     printf("\n\nSquares attacked by:%c\n",SideChar[side]);
+    //     for (rank = RANK_8; rank >= RANK_1; --rank) {
+    //         for (file = FILE_A; file <= FILE_H; ++file) {
+    //             sq = FR2SQ(file, rank);
+    //             if (SqAttacked(sq, side, pos) == TRUE) {
+    //                 printf("x");
+    //             } else {
+    //                 printf("-");
+    //             }
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n\n");
+    // }
+
+
+    // void PrintBin(int move) {
+    //     int index = 0;
+    //     printf("As binary: \n");
+    //     for (index = 27; index >= 0; index--) {
+    //         if ((1 << index) & move) printf("1");
+    //         else printf("0");
+    //         if (index != 20 && index%4 == 0) printf(" ");
+    //     }
+    //     printf("\n");
+    // }
+
+
+
+
+    // int move = 0;
+    // int from = A2; int to = H7;
+    // int cap = wR; int prom = bK;
+
+    // move = ( ( from ) | (to << 7) | (cap << 14) | (prom << 20) );
+
+    // // printf("\ndec: %d hex: %X\n", move, move);
+    // // PrintBin(move);
+
+    // printf("From: %d to: %d cap: %d prom: %d\n",
+    //     FROMSQ(move), TOSQ(move), CAPTURED(move),
+    //     PROMOTED(move));
+
+    // // move |= MFLAG_PS;
+    // // printf("is PST: %s\n", (move & MFLAG_PS) ? "YES":"NO");
+
+    // printf("Algebraic from: %s\n", PrintSq(from));
+    // printf("Algebraic to: %s\n", PrintSq(to));
+    // printf("Algebraic move: %s\n", PrintMove(move));

@@ -25,6 +25,7 @@ typedef unsigned long long U64;
 #define BRD_SQ_NUM 120
 
 #define MAXGAMEMOVES 2048
+#define MAX_POSITION_MOVES 256
 
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
@@ -49,6 +50,20 @@ enum { FALSE, TRUE };
 
 //Castling definitions: https://chatgpt.com/s/t_68766f6682b48191a9f2afe339975026
 enum { WKCA = 1, WQCA = 2, BKCA = 4, BQCA = 8 };
+
+
+typedef struct S_MOVE {
+    int move;
+    int score;
+
+} S_MOVE;
+
+typedef struct S_MOVELIST {
+
+    S_MOVE moves[MAX_POSITION_MOVES];
+    int count;
+
+} S_MOVELIST;
 
 typedef struct S_UNDO {
 
@@ -91,6 +106,19 @@ typedef struct S_BOARD {
 
 } S_BOARD;
 
+
+/* GAME MOVE */
+#define FROMSQ(m) ((m) & 0x7F)
+#define TOSQ(m) (((m) >> 7) & 0x7F)
+#define CAPTURED(m) (((m) >> 14) & 0xF)
+#define PROMOTED(m) (((m) >> 20) & 0xF)
+
+#define MFLAG_EP    0x40000 //Move Flag _ En Passant
+#define MFLAG_PS    0x80000
+#define MFLAG_CA    0x1000000
+
+#define MFLAG_CAP   0x7C000
+#define MFLAG_PROM  0xF00000
 
 /* MACROS */
 #define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
@@ -155,5 +183,21 @@ extern int CheckBoard(const S_BOARD *pos);
 
 //moveLogic.c
 extern int SqAttacked(const int sq, const int side, const S_BOARD *pos);
+
+//io.c
+extern char *PrintSq(const int sq);
+extern char *PrintMove(const int move);
+extern void PrintMoveList(const S_MOVELIST *list);
+
+//moveGen.c
+extern void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list);
+
+//validate.c
+extern int SqOnBoard(const int sq);
+extern int SideValid(const int side);
+extern int FileRankValid(const int fr);
+extern int PieceValidEmpty(const int pce);
+extern int PieceValid(const int pce);
+
 
 #endif
