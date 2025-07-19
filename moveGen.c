@@ -123,7 +123,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
 
     int pce = EMPTY;
     int side = pos -> side;
-    int sq = 0; int t_sq = 0;
+    int sq = 0; int t_sq = 0; //t_sq is target Square
     int pceNum = 0;
     int dir = 0;
     int index = 0;
@@ -136,7 +136,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
             sq = pos -> pList[wP][pceNum];
             ASSERT(SqOnBoard(sq));
 
-            //Move Forward
+            //Move Forward - White
             if (pos -> pieces[sq + 10] == EMPTY) {
                 AddWhitePawnMove(pos, sq, sq+10, list);
                 if (RanksBrd[sq] == RANK_2 && pos -> pieces[sq + 20] == EMPTY) {
@@ -144,7 +144,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 }
             }
             
-            //Capture Permission
+            //Capture Permission - White
             if (!SQOFFBOARD(sq + 9) && PieceCol[pos -> pieces[sq + 9]] == BLACK) {
                 AddWhitePawnCapMove(pos, sq, sq+9, pos->pieces[sq+9], list);
             }
@@ -152,7 +152,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 AddWhitePawnCapMove(pos, sq, sq+11, pos->pieces[sq+11], list);
             }
 
-            //En Passant Permission
+            //En Passant Permission - White
             // if (pos -> enPas != NO_SQ) {
             if (sq + 9 == pos -> enPas) {
                 AddEnPassantMove(pos, MOVE(sq, sq+9, EMPTY, EMPTY, MFLAG_EP), list);
@@ -162,12 +162,30 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
             }
             // }
         }
+
+        //Castling Permission - White
+        if (pos -> castlePerm & WKCA) {
+            if (pos -> pieces[F1] == EMPTY && pos -> pieces[G1] == EMPTY) {
+                if (!SqAttacked(E1, BLACK, pos) && !SqAttacked(F1, BLACK, pos)) {
+                    AddQuietMove(pos, MOVE(E1, G1, EMPTY, EMPTY, MFLAG_CA), list);
+                }
+            }
+        }
+
+        if (pos -> castlePerm & WQCA) {
+            if (pos -> pieces[B1] == EMPTY && pos -> pieces[C1] == EMPTY && pos -> pieces[D1] == EMPTY) {
+                if (!SqAttacked(D1, BLACK, pos) && !SqAttacked(E1, BLACK, pos)) {
+                    AddQuietMove(pos, MOVE(E1, C1, EMPTY, EMPTY, MFLAG_CA), list);
+                }
+            }
+        }
+
     } else { 
         for (pceNum = 0; pceNum < pos -> pceNum[bP]; ++pceNum) {
             sq = pos -> pList[bP][pceNum];
             ASSERT(SqOnBoard(sq));
 
-            //Move Forward
+            //Move Forward - Black
             if (pos -> pieces[sq - 10] == EMPTY) {
                 AddBlackPawnMove(pos, sq, sq-10, list);
                 if (RanksBrd[sq] == RANK_7 && pos -> pieces[sq - 20] == EMPTY) {
@@ -175,7 +193,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 }
             }
 
-            //Capture Permission
+            //Capture Permission - Black
             if (!SQOFFBOARD(sq - 9) && PieceCol[pos -> pieces[sq - 9]] == WHITE) {
                 AddBlackPawnCapMove(pos, sq, sq-9, pos->pieces[sq-9], list);
             }
@@ -183,7 +201,7 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 AddBlackPawnCapMove(pos, sq, sq-11, pos->pieces[sq-11], list);
             }
 
-            //En Passant Permission
+            //En Passant Permission - Black
             // if (pos -> enPas != NO_SQ) {
             if (sq - 9 == pos -> enPas) {
                 AddEnPassantMove(pos, MOVE(sq, sq-9, EMPTY, EMPTY, MFLAG_EP), list);
@@ -193,6 +211,23 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
             }
             // }
         }
+
+        //Castling Permission - Black
+        if (pos -> castlePerm & BKCA) {
+            if (pos -> pieces[F8] == EMPTY && pos -> pieces[G8] == EMPTY) {
+                if (!SqAttacked(E8, WHITE, pos) && !SqAttacked(F8, WHITE, pos)) {
+                    AddQuietMove(pos, MOVE(E8, G8, EMPTY, EMPTY, MFLAG_CA), list);
+                }
+            }
+        }
+
+        if (pos -> castlePerm & BQCA) {
+            if (pos -> pieces[B8] == EMPTY && pos -> pieces[C8] == EMPTY && pos -> pieces[D8] == EMPTY) {
+                if (!SqAttacked(D8, WHITE, pos) && !SqAttacked(E8, WHITE, pos)) {
+                    AddQuietMove(pos, MOVE(E8, C8, EMPTY, EMPTY, MFLAG_CA), list);
+                }
+            }
+        }
     }
 
     // Loop for slide pieces
@@ -201,7 +236,27 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
 
     while (pce != 0) {
         ASSERT(PieceValid(pce));
-        printf("Slider pceIndex: %d pce: %d\n", pceIndex, pce);
+
+        for (pceNum = 0; pceNum < pos -> pceNum[pce]; ++pceNum) {
+            sq = pos -> pList[pce][pceNum];
+            ASSERT(SqOnBoard(sq));
+
+            for (index = 0; index < NumDir[pce]; ++index) {
+                dir = PceDir[pce][index];
+                t_sq = sq + dir;
+
+                while (!SQOFFBOARD(t_sq)) {
+                    if (pos -> pieces[t_sq] != EMPTY) {
+                        if (PieceCol[pos -> pieces[t_sq]] == side ^ 1) {
+                            AddCaptureMove(pos, MOVE(sq, t_sq, pos->pieces[t_sq], EMPTY, 0), list);
+                        }
+                        break;
+                    }
+                    AddQuietMove(pos, MOVE(sq, t_sq, EMPTY, EMPTY, 0), list);
+                    t_sq += dir;
+                }
+            }
+        }
 
         pce = LoopSlidePce[pceIndex++];
     }
@@ -212,12 +267,10 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
 
     while (pce != 0) {
         ASSERT(PieceValid(pce));
-        printf("Non-Slider pceIndex: %d pce: %d\n", pceIndex, pce);
 
         for (pceNum = 0; pceNum < pos -> pceNum[pce]; ++pceNum) {
             sq = pos -> pList[pce][pceNum];
             ASSERT(SqOnBoard(sq));
-            printf("Piece: %c on %s\n", PceChar[pce], PrintSq(sq));
 
             for (index = 0; index < NumDir[pce]; ++index) {
                 dir = PceDir[pce][index];
@@ -229,11 +282,11 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
 
                 if (pos -> pieces[t_sq] != EMPTY) {
                     if (PieceCol[pos -> pieces[t_sq]] == side ^ 1) {
-                        printf("\t\tCapture on %s\n", PrintSq(t_sq));
+                        AddCaptureMove(pos, MOVE(sq, t_sq, pos->pieces[t_sq], EMPTY, 0), list);
                     }
                     continue;
                 }
-                printf("\t\tNormal on %s\n", PrintSq(t_sq));
+                AddQuietMove(pos, MOVE(sq, t_sq, EMPTY, EMPTY, 0), list);
             }
         }
 
