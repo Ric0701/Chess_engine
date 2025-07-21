@@ -1,5 +1,6 @@
-//https://www.youtube.com/watch?v=9Rfx1WHkJ3o&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=38
-//Chapter: 38
+//https://youtu.be/qnHQJAsJFvk?list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&t=374
+//Time: 15:00
+//Chapter: 43
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"

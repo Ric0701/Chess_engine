@@ -157,6 +157,7 @@ extern int PieceCol[13];
 extern int FilesBrd[BRD_SQ_NUM];
 extern int RanksBrd[BRD_SQ_NUM];
 
+extern int PiecePawn[13];
 extern int PieceKnight[13];
 extern int PieceKing[13];
 extern int PieceRookQueen[13];
@@ -199,6 +200,10 @@ extern int SideValid(const int side);
 extern int FileRankValid(const int fr);
 extern int PieceValidEmpty(const int pce);
 extern int PieceValid(const int pce);
+
+//makeMove.c
+extern int MakeMove(S_BOARD *pos, int move);
+extern void TakeMove(S_BOARD *pos);
 
 
 #endif

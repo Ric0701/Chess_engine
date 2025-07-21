@@ -1,3 +1,14 @@
+/*
+This File handles all the move rules such as how knight moves.
+List of Handled pieces:
+1. Pawns (move forward 1 or 2 squares, Diagonal Capture, En Passant, Promotions)
+2. Knight (L-Shape)
+3. Bishop (Long Range Diagonal sliding)
+4. Rook (Long Range Vertical & Horizontal sliding)
+5. Queen (Bishop + Rook move logic)
+6. King (One Square at a time)
+*/
+
 #include "defs.h"
 
 #define MOVE(f, t, ca, pro, fl) ( (f) | ((t) << 7) | ( (ca) << 14) | ( (pro) << 20) | (fl))
@@ -128,8 +139,6 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
     int dir = 0;
     int index = 0;
     int pceIndex = 0;
-
-    printf("\n\nSlide: %d\n", side);
 
     if (side == WHITE) {
         for (pceNum = 0; pceNum < pos -> pceNum[wP]; ++pceNum) {

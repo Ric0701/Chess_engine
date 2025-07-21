@@ -6,7 +6,8 @@ TARGET = Mystery.exe
 
 # Source files
 SRC = Mystery.c init.c bitboard.c hashKeys.c board.c \
-		data.c moveLogic.c io.c moveGen.c validate.c
+		data.c moveLogic.c io.c moveGen.c validate.c \
+		makeMove.c perfTest.c
 
 # Performance tuning
 PERF = -O2
