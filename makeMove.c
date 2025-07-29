@@ -109,8 +109,8 @@ static void MovePiece(const int from, const int to, S_BOARD *pos) {
     if (!PieceBig[pce]) {
         CLRBIT(pos -> pawns[col], SQ64(from));
         CLRBIT(pos -> pawns[BOTH], SQ64(from));
-        CLRBIT(pos -> pawns[col], SQ64(to));
-        CLRBIT(pos -> pawns[BOTH], SQ64(to));
+        SETBIT(pos -> pawns[col], SQ64(to));
+        SETBIT(pos -> pawns[BOTH], SQ64(to));
     }
 
     for (index = 0; index < pos -> pceNum[pce]; ++index) {
@@ -150,15 +150,13 @@ int MakeMove(S_BOARD *pos, int move) {
     } else if (move & MFLAG_CA) {
         switch(to) {
             case C1:
-                MovePiece(A1, D1, pos);
+                MovePiece(A1, D1, pos); break;
             case C8:
-                MovePiece(A8, D8, pos);
+                MovePiece(A8, D8, pos); break;
             case G1:
-                MovePiece(H1, F1, pos);
+                MovePiece(H1, F1, pos); break;
             case G8:
-                MovePiece(H8, F8, pos);
-            break;
-            
+                MovePiece(H8, F8, pos); break;
             default: ASSERT(FALSE); break;
         }
     }
@@ -186,7 +184,7 @@ int MakeMove(S_BOARD *pos, int move) {
         pos -> fiftyMove = 0;
     }
 
-    pos -> hisPly;
+    pos -> hisPly++;
     pos -> ply++;
 
     if (PiecePawn[pos -> pieces[from]]) {
@@ -244,7 +242,7 @@ void TakeMove(S_BOARD *pos) {
     HASH_CA;
 
     pos -> castlePerm = pos -> history[pos -> hisPly].castlePerm;
-    pos -> fiftyMove = pos -> history[pos -> hisPly]. fiftyMove;
+    pos -> fiftyMove = pos -> history[pos -> hisPly].fiftyMove;
     pos -> enPas = pos -> history[pos -> hisPly].enPas;
 
     if (pos -> enPas != NO_SQ) HASH_EP;
@@ -268,7 +266,7 @@ void TakeMove(S_BOARD *pos) {
             case G1:
                 MovePiece(F1, H1, pos); break;
             case G8:
-                MovePiece(F1, H1, pos); break;
+                MovePiece(F8, H8, pos); break;
             default:
                 ASSERT(FALSE); break;
 

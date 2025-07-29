@@ -2,6 +2,9 @@
     "files.associations": {
         "*.inc": "php",
         "random": "c",
-        "defs.h": "c"
+        "defs.h": "c",
+        "time.h": "c",
+        "windows.h": "c",
+        "charconv": "c"
     }
 }

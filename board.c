@@ -1,6 +1,7 @@
 // #undef OFFBOARD
 #include "defs.h"
 
+
 int CheckBoard(const S_BOARD *pos) {
     // 't' means temporary
     int t_pceNum[13]    = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -9,7 +10,8 @@ int CheckBoard(const S_BOARD *pos) {
     int t_minPce[2]     = {0, 0};
     int t_material[2]   = {0, 0};
 
-    int sq64, t_piece, t_pce_num, sq120, colour, pcount;
+    int sq64, t_piece, t_pce_num, sq120, colour;
+    int pcount = 0;
 
     U64 t_pawns[3] = {0ULL, 0ULL, 0ULL};
 
@@ -42,13 +44,14 @@ int CheckBoard(const S_BOARD *pos) {
         ASSERT(t_pceNum[t_piece] == pos -> pceNum[t_piece]);
     }
 
+
     //Checking for bitboards count
     pcount = CNT(t_pawns[WHITE]);
     ASSERT(pcount == pos -> pceNum[wP]);
     pcount = CNT(t_pawns[BLACK]);
     ASSERT(pcount == pos -> pceNum[bP]);
     pcount = CNT(t_pawns[BOTH]);
-    ASSERT(pcount == pos -> pceNum[wP] + pos -> pceNum[bP]);
+    ASSERT(pcount == (pos -> pceNum[wP] + pos -> pceNum[bP]));
 
     //Check bitboards squares
     while (t_pawns[WHITE]) {
@@ -114,6 +117,7 @@ void UpdateListsMaterials(S_BOARD *pos) {
             if (piece == bK) pos -> KingSq[BLACK] = sq;
 
             if (piece == wP) {
+                printf("Pawn on square %d (piece: %d)\n", sq, piece);//Debugging
                 SETBIT(pos -> pawns[WHITE], SQ64(sq));
                 SETBIT(pos -> pawns[BOTH], SQ64(sq));
             } else if (piece == bP) {
@@ -181,6 +185,8 @@ int Parse_FEN(char *fen, S_BOARD *pos) {
 
         // Scanning through the FEN pos
         for (i = 0; i < count; i++) {
+            ASSERT(file >= FILE_A && file <= FILE_H); //Debugging
+
             sq64 = rank * 8 + file;
             sq120 = SQ120(sq64);
             if (piece != EMPTY) {
@@ -224,7 +230,7 @@ int Parse_FEN(char *fen, S_BOARD *pos) {
     }
 
     pos -> posKey = GeneratePosKey(pos);
-
+    
     UpdateListsMaterials(pos);
 
     return 0;
@@ -268,6 +274,8 @@ void ResetBoard(S_BOARD *pos) {
     pos -> castlePerm = 0;
 
     pos -> posKey = 0ULL;
+
+    InitPvTable(pos -> PvTable);
 }
 
 void PrintBoard(const S_BOARD *pos) {

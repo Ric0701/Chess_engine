@@ -5,16 +5,20 @@
 #include <stdlib.h>
 
 // Debugging pointer
-#define DEBUG
+#define DEBUG //Switch on or off
+
 #ifdef DEBUG
 #define ASSERT(n) \
-if(!(n)) { \
-    printf("%s - Failed ", #n); \
-    printf("On %s ", __DATE__); \
-    printf("At %s ", __TIME__); \
-    printf("In File %s ", __FILE__); \
-    printf("At Line %d\n", __LINE__); \
-    exit(1); }
+do { \
+    if(!(n)) { \
+        printf("%s - Failed ", #n); \
+        printf("On %s ", __DATE__); \
+        printf("At %s ", __TIME__); \
+        printf("In File %s ", __FILE__); \
+        printf("At Line %d\n", __LINE__); \
+        exit(1); \
+    } \
+} while (0)
 #else
 #define ASSERT(n)
 #endif
@@ -26,6 +30,7 @@ typedef unsigned long long U64;
 
 #define MAXGAMEMOVES 2048
 #define MAX_POSITION_MOVES 256
+#define MAXDEPTH 245
 
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
@@ -55,15 +60,22 @@ enum { WKCA = 1, WQCA = 2, BKCA = 4, BQCA = 8 };
 typedef struct S_MOVE {
     int move;
     int score;
-
 } S_MOVE;
 
-typedef struct S_MOVELIST {
-
+typedef struct S_MOVELIST{
     S_MOVE moves[MAX_POSITION_MOVES];
     int count;
-
 } S_MOVELIST;
+
+typedef struct S_PVENTRY{
+    U64 posKey;
+    int move;
+} S_PVENTRY; //PV Entry
+
+typedef struct S_PVTABLE{
+    S_PVENTRY *pTable;
+    int numEntries;
+} S_PVTABLE;
 
 typedef struct S_UNDO {
 
@@ -88,6 +100,8 @@ typedef struct S_BOARD {
 
     int ply;
     int hisPly;
+
+    int castlePerm;
     
     U64 posKey;
 
@@ -102,7 +116,8 @@ typedef struct S_BOARD {
     //Piece List (Maximum 10 pieces for a piece set like pawn) - https://chatgpt.com/s/t_686fd9f539fc8191b87e12cf9425a46b
     int pList[13][10];
 
-    int castlePerm;
+    S_PVTABLE PvTable[1];
+    int PvArray[MAXDEPTH];
 
 } S_BOARD;
 
@@ -120,10 +135,12 @@ typedef struct S_BOARD {
 #define MFLAG_CAP   0x7C000
 #define MFLAG_PROM  0xF00000
 
+#define NO_MOVE 0
+
 /* MACROS */
 #define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
-#define SQ64(SQ120) (Sq120ToSq64[SQ120])
-#define SQ120(SQ64) (Sq64ToSq120[SQ64])
+#define SQ64(sq120) (Sq120ToSq64[sq120])
+#define SQ120(sq64) (Sq64ToSq120[sq64])
 #define POP(b) PopBit(b)
 #define CNT(b) CountBits(b)
 #define SETBIT(bb, sq) ((bb) |= SetMask[(sq)])
@@ -190,9 +207,11 @@ extern int SqAttacked(const int sq, const int side, const S_BOARD *pos);
 extern char *PrintSq(const int sq);
 extern char *PrintMove(const int move);
 extern void PrintMoveList(const S_MOVELIST *list);
+extern int ParseMove(char *ptrChar, S_BOARD *pos);
 
 //moveGen.c
 extern void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list);
+extern int MoveExists(S_BOARD *pos, const int move);
 
 //validate.c
 extern int SqOnBoard(const int sq);
@@ -204,6 +223,24 @@ extern int PieceValid(const int pce);
 //makeMove.c
 extern int MakeMove(S_BOARD *pos, int move);
 extern void TakeMove(S_BOARD *pos);
+
+//perfTest.c
+extern void Perft(int depth, S_BOARD *pos);
+extern void PerftTest (int depth, S_BOARD *pos);
+
+//search.c
+extern int IsRepetition(const S_BOARD *pos);
+extern void SearchPosition(S_BOARD *pos);
+
+//utility.c
+extern int GetTimeMs();
+
+//pvtable.c
+// extern void ClearPvTable(S_PVTABLE *table);
+extern void InitPvTable(S_PVTABLE *table);
+extern void StorePvMove(const S_BOARD *pos, const int move);
+extern int ProbePvTable(const S_BOARD *pos);
+extern int GetPvLine(const int depth, S_BOARD *pos);
 
 
 #endif

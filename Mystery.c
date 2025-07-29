@@ -1,6 +1,6 @@
-//https://youtu.be/qnHQJAsJFvk?list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&t=374
-//Time: 15:00
-//Chapter: 43
+//https://www.youtube.com/watch?v=_063cuTPOe8&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=54
+//Time: 0:00
+//Chapter: 54
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -23,24 +23,63 @@
 #define Castling "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1"
 #define Tricky_Castle_Right "3rk2r/8/8/8/8/8/6p1/R3K2R b KQk - 0 1"
 #define Less_Tricky "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-
+#define Huge "R6r/8/8/2K5/5k2/8/8/r6R w - - 0 1" //Depth 6
 
 
 int main() {
+    printf("Program started...\n"); //Debug
+
     AllInit();
+
+    printf("AllInit() complete.\n"); //Debug
 
     S_BOARD board[1];
     S_MOVELIST list[1];
 
-    Parse_FEN(Less_Tricky, board);
-    PrintBoard(board);
+    Parse_FEN(START_FEN, board);
+    // PerftTest(6, board);
+    printf("FEN parsed.\n");
 
-    // S_MOVELIST list[1];
+    char input[6];
+    int Move = NO_MOVE;
+    int PvNum = 0;
+    int Max = 0;
 
-    GenerateAllMoves(board, list);
+    while (TRUE) {
+        PrintBoard(board);
+        printf("Please enter a move > ");
+        fgets(input, 6, stdin);
 
-    PrintMoveList(list);
+        if (input[0] == 'q') {
+            break;
+        } else if (input[0] == 't') {
+            TakeMove(board);
+        } else if (input[0] == 'p') {
+            // PerftTest(4, board);
+            Max = GetPvLine(4, board);
+            printf("PvLine of %d Moves: ", Max);
+            for (PvNum = 0; PvNum < Max; ++PvNum) {
+                Move = board -> PvArray[PvNum];
+                printf(" %s", PrintMove(Move));
+            }
+            printf("\n");
+        } else {
+            Move = ParseMove(input, board);
+            if (Move != NO_MOVE) {
+                StorePvMove(board, Move);
+                MakeMove(board, Move);
+                // if (IsRepetition(board)) {
+                //     printf("Repeatition seen!\n");
+                // }
+            } else {
+                printf("Move Not Parsed: %s\n", input);
+            }
+        }
 
+        fflush(stdin);
+    }
+
+    printf("Program completed basic setup.\n");
     return 0;
 }
 
@@ -180,3 +219,16 @@ int main() {
     // printf("Algebraic from: %s\n", PrintSq(from));
     // printf("Algebraic to: %s\n", PrintSq(to));
     // printf("Algebraic move: %s\n", PrintMove(move));
+
+
+
+    // int IsRepetition(const S_BOARD *pos) {
+    //     int index = 0;
+
+    //     for (index = 0; index < pos -> hisPly-1; ++index) {
+    //         if (pos -> posKey == pos -> history[index].posKey) {
+    //             return TRUE;
+    //         }
+    //     }
+    //     return FALSE;
+    // }
