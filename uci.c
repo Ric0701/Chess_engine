@@ -141,7 +141,7 @@ void UCI_Loop() {
             info -> quit = TRUE;
             break;
         } else if (!strncmp(line, "uci", 3)) {
-            printf("id name &s\n", NAME);
+            printf("id name %s\n", NAME);
             printf("id author %s\n", AUTHOR);
             printf("uciok\n");
         }
