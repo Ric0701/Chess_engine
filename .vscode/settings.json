@@ -5,6 +5,8 @@
         "defs.h": "c",
         "time.h": "c",
         "windows.h": "c",
-        "charconv": "c"
+        "charconv": "c",
+        "string.h": "c",
+        "sstream": "c"
     }
 }

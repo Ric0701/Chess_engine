@@ -1,6 +1,6 @@
-//https://www.youtube.com/watch?v=_063cuTPOe8&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=54
+//https://www.youtube.com/watch?v=gVGadWuBqEA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=70
 //Time: 0:00
-//Chapter: 54
+//Chapter: 70
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -25,61 +25,16 @@
 #define Less_Tricky "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 #define Huge "R6r/8/8/2K5/5k2/8/8/r6R w - - 0 1" //Depth 6
 
+#define Mate3byBlack "5rk1/1p4pp/2p5/p2p4/3Pn3/1Pq5/PK6/2B5 w - - 0 32"
+#define M2 "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w Q - 0 1"
+#define M5 "6k1/3b3r/1p1p4/p1n2p2/1PPNpP1q/P3Q1p1/1R1RB1P1/5K2 b - - 0-1"
+#define pos "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1"
 
 int main() {
-    printf("Program started...\n"); //Debug
-
     AllInit();
 
-    printf("AllInit() complete.\n"); //Debug
+    UCI_Loop();
 
-    S_BOARD board[1];
-    S_MOVELIST list[1];
-
-    Parse_FEN(START_FEN, board);
-    // PerftTest(6, board);
-    printf("FEN parsed.\n");
-
-    char input[6];
-    int Move = NO_MOVE;
-    int PvNum = 0;
-    int Max = 0;
-
-    while (TRUE) {
-        PrintBoard(board);
-        printf("Please enter a move > ");
-        fgets(input, 6, stdin);
-
-        if (input[0] == 'q') {
-            break;
-        } else if (input[0] == 't') {
-            TakeMove(board);
-        } else if (input[0] == 'p') {
-            // PerftTest(4, board);
-            Max = GetPvLine(4, board);
-            printf("PvLine of %d Moves: ", Max);
-            for (PvNum = 0; PvNum < Max; ++PvNum) {
-                Move = board -> PvArray[PvNum];
-                printf(" %s", PrintMove(Move));
-            }
-            printf("\n");
-        } else {
-            Move = ParseMove(input, board);
-            if (Move != NO_MOVE) {
-                StorePvMove(board, Move);
-                MakeMove(board, Move);
-                // if (IsRepetition(board)) {
-                //     printf("Repeatition seen!\n");
-                // }
-            } else {
-                printf("Move Not Parsed: %s\n", input);
-            }
-        }
-
-        fflush(stdin);
-    }
-
-    printf("Program completed basic setup.\n");
     return 0;
 }
 
@@ -232,3 +187,50 @@ int main() {
     //     }
     //     return FALSE;
     // }
+
+
+
+    // S_BOARD board[1] = {0};
+    // InitPvTable(board -> PvTable);
+    // S_PVENTRY pvTable;
+    // S_MOVELIST list[1];
+    // S_SEARCHINFO info[1];
+    // InitPvTable(&board[0].PvTable[0]); //ChatGPT
+
+    // Parse_FEN(M5, board);
+    // // PerftTest(6, board);
+    // printf("FEN parsed.\n");
+
+    // char input[6];
+    // int Move = NO_MOVE;
+    // int PvNum = 0;
+    // int Max = 0;
+
+    // while (TRUE) {
+    //     PrintBoard(board);
+    //     printf("Please enter a move > ");
+    //     fgets(input, 6, stdin);
+
+    //     if (input[0] == 'q') {
+    //         break;
+    //     } else if (input[0] == 't') {
+    //         TakeMove(board);
+    //     } else if (input[0] == 's') {
+    //         info -> depth = 10;
+    //         info -> startTime = GetTimeMs();
+    //         info -> stopTime = GetTimeMs() + 200000;
+    //         SearchPosition(board, info);
+    //     } else {
+    //         Move = ParseMove(input, board);
+    //         if (Move != NO_MOVE) {
+    //             StorePvMove(board, Move);
+    //             MakeMove(board, Move);
+    //         } else {
+    //             printf("Move Not Parsed: %s\n", input);
+    //         }
+    //     }
+
+    //     fflush(stdin);
+    // }
+    // 
+    // free(board -> PvTable -> pTable);

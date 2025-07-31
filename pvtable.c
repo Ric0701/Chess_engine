@@ -1,4 +1,5 @@
 #include "defs.h"
+#include <stdbool.h>
 
 int GetPvLine(const int depth, S_BOARD *pos) {
     ASSERT(depth < MAXDEPTH);
@@ -27,6 +28,9 @@ int GetPvLine(const int depth, S_BOARD *pos) {
 const int PvSize = 0x100000 * 2;
 
 void ClearPvTable(S_PVTABLE *table) {
+    ASSERT(table != NULL);
+    ASSERT(table->pTable != NULL);
+
     S_PVENTRY *pvEntry;
 
     for (pvEntry = table -> pTable; pvEntry < table -> pTable + table -> numEntries; pvEntry++) {
@@ -36,13 +40,26 @@ void ClearPvTable(S_PVTABLE *table) {
 }
 
 void InitPvTable(S_PVTABLE *table) {
+    ASSERT(table != NULL);
+
     table -> numEntries = PvSize / sizeof(S_PVENTRY);
     table -> numEntries -= 2;
+    
+    static bool firstInit = true; //Deepseek
+    if (firstInit) {
+        table->pTable = NULL;
+        firstInit = false;
+    }
+
     if (table -> pTable != NULL) {
         free(table -> pTable);
+        table->pTable = NULL; //ChatGpt
     }
+
     table -> pTable = (S_PVENTRY *) malloc(table -> numEntries * sizeof(S_PVENTRY));
+
     ClearPvTable(table);
+
     printf("PvTable init complete with %d entries\n", table -> numEntries);
 }
 

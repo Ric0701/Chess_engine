@@ -39,21 +39,6 @@ void InitFilesRankBrd() {
             RanksBrd[sq] = rank;
         }
     }
-
-    //Subject to delete in future
-    // printf("FilesBrd\n");
-    // for (index = 0; index < BRD_SQ_NUM; ++index) {
-    //     if (index%10==0 && index != 0) printf("\n");
-    //     printf("%4d", FilesBrd[index]);
-    // }
-    // printf("\n");
-
-    // printf("RanksBrd\n");
-    // for (index = 0; index < BRD_SQ_NUM; ++index) {
-    //     if (index%10==0 && index != 0) printf("\n");
-    //     printf("%4d", RanksBrd[index]);
-    // }
-    /**/
 }
 
 void InitHashKeys() {
@@ -80,7 +65,7 @@ void InitBitMasks() {
 
     for (index = 0; index < 64; index++) {
         SetMask[index] |= (1ULL << index);
-        ClearMask[index] = ~SetMask[index]; // Suspisious
+        ClearMask[index] = ~SetMask[index];
     }
 }
 
@@ -116,4 +101,5 @@ void AllInit() {
     InitBitMasks();
     InitHashKeys();
     InitFilesRankBrd();
+    InitMvvLva();
 }

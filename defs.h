@@ -26,6 +26,7 @@ do { \
 typedef unsigned long long U64;
 
 #define NAME "Mystery"
+#define AUTHOR "Rick"
 #define BRD_SQ_NUM 120
 
 #define MAXGAMEMOVES 2048
@@ -33,6 +34,9 @@ typedef unsigned long long U64;
 #define MAXDEPTH 245
 
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+#define INFINITE 200
+#define ISMATE (INFINITE - MAXDEPTH)
 
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
@@ -116,10 +120,32 @@ typedef struct S_BOARD {
     //Piece List (Maximum 10 pieces for a piece set like pawn) - https://chatgpt.com/s/t_686fd9f539fc8191b87e12cf9425a46b
     int pList[13][10];
 
-    S_PVTABLE PvTable[1];
+    S_PVTABLE *PvTable;
     int PvArray[MAXDEPTH];
 
+    int searchHistory[13][BRD_SQ_NUM];
+    int searchKillers[2][MAXDEPTH];
+
 } S_BOARD;
+
+typedef struct S_SEARCHINFO {
+    int startTime;
+    int stopTime;
+    int depth;
+    int depthset;
+    int timeSet;
+    int movesTogo;
+    int infinite;
+
+    long nodes;
+
+    int quit;
+    int stopped;
+
+    float fh; //Fail high
+    float fhf; //Fail high first
+
+} S_SEARCHINFO;
 
 
 /* GAME MOVE */
@@ -211,7 +237,9 @@ extern int ParseMove(char *ptrChar, S_BOARD *pos);
 
 //moveGen.c
 extern void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list);
+extern void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list);
 extern int MoveExists(S_BOARD *pos, const int move);
+extern int InitMvvLva();
 
 //validate.c
 extern int SqOnBoard(const int sq);
@@ -229,18 +257,24 @@ extern void Perft(int depth, S_BOARD *pos);
 extern void PerftTest (int depth, S_BOARD *pos);
 
 //search.c
-extern int IsRepetition(const S_BOARD *pos);
-extern void SearchPosition(S_BOARD *pos);
+extern void SearchPosition(S_BOARD *pos, S_SEARCHINFO *info);
 
 //utility.c
 extern int GetTimeMs();
 
 //pvtable.c
-// extern void ClearPvTable(S_PVTABLE *table);
+extern void ClearPvTable(S_PVTABLE *table);
 extern void InitPvTable(S_PVTABLE *table);
 extern void StorePvMove(const S_BOARD *pos, const int move);
 extern int ProbePvTable(const S_BOARD *pos);
 extern int GetPvLine(const int depth, S_BOARD *pos);
 
+//evaluate.c
+extern int EvalPosition(const S_BOARD *pos);
+
+//uci.c
+extern void ParseGo(char* line, S_SEARCHINFO *info, S_BOARD *pos);
+extern void ParsePosition(char* lineIn, S_BOARD *pos);
+extern void UCI_Loop();
 
 #endif

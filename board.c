@@ -117,7 +117,6 @@ void UpdateListsMaterials(S_BOARD *pos) {
             if (piece == bK) pos -> KingSq[BLACK] = sq;
 
             if (piece == wP) {
-                printf("Pawn on square %d (piece: %d)\n", sq, piece);//Debugging
                 SETBIT(pos -> pawns[WHITE], SQ64(sq));
                 SETBIT(pos -> pawns[BOTH], SQ64(sq));
             } else if (piece == bP) {
@@ -185,7 +184,7 @@ int Parse_FEN(char *fen, S_BOARD *pos) {
 
         // Scanning through the FEN pos
         for (i = 0; i < count; i++) {
-            ASSERT(file >= FILE_A && file <= FILE_H); //Debugging
+            ASSERT(file >= FILE_A && file <= FILE_H);
 
             sq64 = rank * 8 + file;
             sq120 = SQ120(sq64);
@@ -237,6 +236,7 @@ int Parse_FEN(char *fen, S_BOARD *pos) {
 }
 
 void ResetBoard(S_BOARD *pos) {
+    
     int index = 0;
 
     for (index = 0; index < BRD_SQ_NUM; ++index) {
@@ -274,8 +274,6 @@ void ResetBoard(S_BOARD *pos) {
     pos -> castlePerm = 0;
 
     pos -> posKey = 0ULL;
-
-    InitPvTable(pos -> PvTable);
 }
 
 void PrintBoard(const S_BOARD *pos) {

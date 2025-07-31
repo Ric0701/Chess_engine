@@ -35,9 +35,6 @@ char *PrintMove(const int move) {
         sprintf(MvStr, "%c%c%c%c", ('a' + ff), ('1' + rf), ('a' + ft), ('1' + rt));
     }
 
-    // printf("DEBUG move: %d from: %d to: %d\n", move, FROMSQ(move), TOSQ(move));
-    // printf("DEBUG ff=%d rf=%d ft=%d rt=%d\n", ff, rf, ft, rt);
-
     return MvStr;
 }
 
