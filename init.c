@@ -21,6 +21,87 @@ U64 CastleKeys[16];
 int FilesBrd[BRD_SQ_NUM];
 int RanksBrd[BRD_SQ_NUM];
 
+U64 FileBBMask[8];
+U64 RankBBMask[8];
+
+U64 BlackPassPawnMask[64];
+U64 WhitePassPawnMask[64];
+U64 IsolatePawnMask[64];
+
+void InitEvalMasks() {
+    int sq, tsq, r, f; //tsq is target Square
+
+    for (sq = 0; sq < 8; ++sq) {
+        FileBBMask[sq] = 0ULL;
+        RankBBMask[sq] = 0ULL;
+    }
+
+    for (r = RANK_8; r >= RANK_1; r--) {
+        for (f = FILE_A; f <= FILE_H; f++) {
+            sq = r * 8 + f;
+            FileBBMask[f] |= (1ULL << sq);
+            RankBBMask[r] |= (1ULL << sq);
+        }
+    }
+
+    for (sq = 0; sq < 64; ++sq) {
+        IsolatePawnMask[sq] = 0ULL;
+        WhitePassPawnMask[sq] = 0ULL;
+        BlackPassPawnMask[sq] = 0ULL;
+    }
+
+    for (sq = 0; sq < 64; ++sq) {
+        tsq = sq + 8;
+
+        while (tsq < 64) {
+            WhitePassPawnMask[sq] |= (1ULL << tsq);
+            tsq += 8;
+        }
+
+        tsq = sq - 8;
+        while (tsq >= 0) {
+            BlackPassPawnMask[sq] |= (1ULL << tsq);
+            tsq -= 8;
+        }
+
+        if (FilesBrd[SQ120(sq)] > FILE_A) {
+            IsolatePawnMask[sq] |= FileBBMask[FilesBrd[SQ120(sq)] - 1];
+
+            tsq = sq + 7;
+            while (tsq < 64) {
+                WhitePassPawnMask[sq] |= (1ULL << tsq);
+                tsq += 8;
+            }
+
+            tsq = sq - 9;
+            while (tsq >= 0) {
+                BlackPassPawnMask[sq] |= (1ULL << tsq);
+                tsq -= 8;
+            }
+        }
+
+        if (FilesBrd[SQ120(sq)] < FILE_H) {
+            IsolatePawnMask[sq] |= FileBBMask[FilesBrd[SQ120(sq)] + 1];
+
+            tsq = sq + 9;
+            while (tsq < 64) {
+                WhitePassPawnMask[sq] |= (1ULL << tsq);
+                tsq += 8;
+            }
+
+            tsq = sq - 7;
+            while (tsq >= 0) {
+                BlackPassPawnMask[sq] |= (1ULL << tsq);
+                tsq -= 8;
+            }
+        }
+    }
+
+    // for (sq = 0; sq < 64; ++sq) {
+    //     PrintBitBoard(IsolatePawnMask[sq]);
+    // }
+}
+
 void InitFilesRankBrd() {
     int index = 0;
     int file = FILE_A;
@@ -101,5 +182,6 @@ void AllInit() {
     InitBitMasks();
     InitHashKeys();
     InitFilesRankBrd();
+    InitEvalMasks();
     InitMvvLva();
 }

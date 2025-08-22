@@ -1,5 +1,12 @@
 #include "defs.h"
 
+const int PawnIsolated = -10;
+const int PawnPassed[8] = { 0, 5, 10, 20, 35, 60, 100, 200 };
+const int RookOpenFile = 10;
+const int RookSemiOpenFile = 5;
+const int QueenOpenFile = 5;
+const int QueenSemiOpenFile = 3;
+
 const int PawnTable[64] = {
     0	,	0	,	0	,	0	,	0	,	0	,	0	,	0	,
     10	,	10	,	0	,	-10	,	-10	,	0	,	10	,	10	,
@@ -66,20 +73,28 @@ const int King_End[64] = {
 	-50	,	-10	,	0	,	0	,	0	,	0	,	-10	,	-50	
 };
 
-const int Mirror64[64] = {
-    56, 57, 58, 59, 60, 61, 62, 63,
-    48, 49, 50, 51, 52, 53, 54, 55,
-    40, 41, 42, 43, 44, 45, 46, 47,
-    32, 33, 34, 35, 36, 37, 38, 39,
-    24, 25, 26, 27, 28, 29, 30, 31,
-    16, 17, 18, 19, 20, 21, 22, 23,
-     8,  9, 10, 11, 12, 13, 14, 15,
-     0,  1,  2,  3,  4,  5,  6,  7
-};
+int MaterialDraw(const S_BOARD *pos) {
+    if (!pos -> pceNum[wR] && !pos -> pceNum[bR] && !pos -> pceNum[wQ] && !pos -> pceNum[bQ]) {
+        if (!pos -> pceNum[bB] && !pos -> pceNum[wB]) {
+            if (pos -> pceNum[wN] < 3 && pos -> pceNum[bN] < 3) { return TRUE; }
+        } else if (!pos -> pceNum[wN] && !pos -> pceNum[bN]) {
+            if (abs(pos -> pceNum[wB]) - pos -> pceNum[bB] < 2) { return TRUE; }
+        } else if ((pos -> pceNum[wN] < 3 && !pos -> pceNum[wB]) || (pos -> pceNum[wB] == 1 && !pos -> pceNum[wN])) {
+            if ((pos -> pceNum[bN] < 3 && !pos -> pceNum[bB]) || (pos -> pceNum[bB] == 1 && !pos -> pceNum[bN])) { return TRUE; }
+        }
+    } else if (!pos -> pceNum[wQ] && !pos -> pceNum[bQ]) {
+        if (pos -> pceNum[wR] == 1 && pos -> pceNum[bR] == 1) {
+            if ((pos -> pceNum[wN] + pos -> pceNum[wB]) < 2 && (pos -> pceNum[bN] + pos -> pceNum[bB]) < 2) { return TRUE; }
+        } else if (pos -> pceNum[wR] == 1 && !pos -> pceNum[bR]) {
+            if ((pos -> pceNum[wN] + pos -> pceNum[wB] == 0) && (((pos -> pceNum[bN] + pos -> pceNum[bB]) == 1) || ((pos -> pceNum[bN] + pos -> pceNum[bB]) == 2))) { return TRUE; }
+        } else if (pos -> pceNum[bR] == 1 && !pos -> pceNum[wR]) {
+            if ((pos -> pceNum[bN] + pos -> pceNum[bB] == 0) && (((pos -> pceNum[wN] + pos -> pceNum[wB]) == 1) || ((pos -> pceNum[wN] + pos -> pceNum[wB]) == 2))) { return TRUE; }
+        }
+    }
+    return FALSE;
+}
 
-#define MIRROR64(sq) (Mirror64[(sq)])
-
-
+#define ENDGAME_MAT (2 * PieceVal[wR] + 4 * PieceVal[wN] + 8 * PieceVal[wP]) //Endgame material
 
 int EvalPosition(const S_BOARD *pos) {
     int pce;
@@ -87,12 +102,26 @@ int EvalPosition(const S_BOARD *pos) {
     int sq;
     int score = pos -> material[WHITE] - pos -> material[BLACK];
 
+    if (MaterialDraw(pos) == TRUE) {
+        return 0;
+    }
+
     //White Pawn
     pce = wP;
     for (pceNum = 0; pceNum < pos -> pceNum[pce]; ++pceNum) {
         sq = pos -> pList[pce][pceNum];
         ASSERT(SqOnBoard(sq));
         score += PawnTable[SQ64(sq)];
+
+        if ((IsolatePawnMask[SQ64(sq)] & pos -> pawns[WHITE]) == 0) {
+            // printf("wP Iso:%s\n", PrintSq(sq));
+            score += PawnIsolated;
+        }
+
+        if ((WhitePassPawnMask[SQ64(sq)] & pos -> pawns[BLACK]) == 0) {
+            // printf("wP Passed:%s\n", PrintSq(sq));
+            score += PawnPassed[RanksBrd[sq]];
+        }
     }
 
     //Black Pawn
@@ -101,6 +130,16 @@ int EvalPosition(const S_BOARD *pos) {
         sq = pos -> pList[pce][pceNum];
         ASSERT(SqOnBoard(sq));
         score -= PawnTable[MIRROR64(SQ64(sq))];
+
+        if ((IsolatePawnMask[SQ64(sq)] & pos -> pawns[BLACK]) == 0) {
+            // printf("bP Iso:%s\n", PrintSq(sq));
+            score -= PawnIsolated;
+        }
+
+        if ((BlackPassPawnMask[SQ64(sq)] & pos -> pawns[WHITE]) == 0) {
+            // printf("bP Passed:%s\n", PrintSq(sq));
+            score -= PawnPassed[7 - RanksBrd[sq]];
+        }
     }
 
     //White Knight
@@ -141,6 +180,13 @@ int EvalPosition(const S_BOARD *pos) {
         sq = pos -> pList[pce][pceNum];
         ASSERT(SqOnBoard(sq));
         score += RookTable[SQ64(sq)];
+
+        //Problematic
+        if (!(pos -> pawns[BOTH] & FileBBMask[FilesBrd[sq]])) {
+            score += RookOpenFile;
+        } else if (!(pos -> pawns[WHITE] & FileBBMask[FilesBrd[sq]])) {
+            score += RookSemiOpenFile;
+        }
     }
 
     //Black Rook
@@ -149,7 +195,60 @@ int EvalPosition(const S_BOARD *pos) {
         sq = pos -> pList[pce][pceNum];
         ASSERT(SqOnBoard(sq));
         score -= RookTable[MIRROR64(SQ64(sq))];
+
+        if (!(pos -> pawns[BOTH] & FileBBMask[FilesBrd[sq]])) {
+            score -= RookOpenFile;
+        } else if (!(pos -> pawns[BLACK] & FileBBMask[FilesBrd[sq]])) {
+            score -= RookSemiOpenFile;
+        }
     }
+
+    //White Queen
+    pce = wQ;
+    for (pceNum = 0; pceNum < pos -> pceNum[pce]; ++pceNum) {
+        sq = pos -> pList[pce][pceNum];
+        ASSERT(SqOnBoard(sq));
+
+        if (!(pos -> pawns[BOTH] & FileBBMask[FilesBrd[sq]])) {
+            score += QueenOpenFile;
+        } else if (!(pos -> pawns[WHITE] & FileBBMask[FilesBrd[sq]])) {
+            score += QueenSemiOpenFile;
+        }
+    }
+
+    //Black Queen
+    pce = bQ;
+    for (pceNum = 0; pceNum < pos -> pceNum[pce]; ++pceNum) {
+        sq = pos -> pList[pce][pceNum];
+        ASSERT(SqOnBoard(sq));
+
+        if (!(pos -> pawns[BOTH] & FileBBMask[FilesBrd[sq]])) {
+            score -= QueenOpenFile;
+        } else if (!(pos -> pawns[BLACK] & FileBBMask[FilesBrd[sq]])) {
+            score -= QueenSemiOpenFile;
+        }
+    }
+
+    //White King
+    pce = wK;
+    sq = pos -> pList[pce][0];
+
+    if (pos -> pceNum[bQ] == 0 || (pos -> material[BLACK] <= ENDGAME_MAT)) {
+        score += King_End[SQ64(sq)];
+    } else {
+        score += King_Opening[SQ64(sq)];
+    }
+
+    //Black Queen
+    pce = bK;
+    sq = pos -> pList[pce][0];
+
+    if (pos -> pceNum[wQ] == 0 || (pos -> material[WHITE] <= ENDGAME_MAT)) {
+        score -= King_End[MIRROR64(SQ64(sq))];
+    } else {
+        score -= King_Opening[MIRROR64(SQ64(sq))];
+    }
+
 
 
     if (pos -> side == WHITE) {

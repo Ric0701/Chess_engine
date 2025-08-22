@@ -83,23 +83,24 @@ int MoveExists(S_BOARD *pos, const int move) {
 static void AddQuietMove(const S_BOARD *pos, int move, S_MOVELIST *list) {
     ASSERT(SqOnBoard(FROMSQ(move)));
     ASSERT(SqOnBoard(TOSQ(move)));
+    ASSERT(CheckBoard(pos));
     
     list -> moves[list -> count].move = move;
 
-    if (pos -> searchKillers[1][pos -> ply] == move) {
+    if (pos -> searchKillers[0][pos -> ply] == move) {
         list -> moves[list -> count].score = 90;
     } else if (pos -> searchKillers[1][pos -> ply] == move) {
         list -> moves[list -> count].score = 80;
     } else {
         list -> moves[list -> count].score = pos -> searchHistory[pos -> pieces[FROMSQ(move)]][TOSQ(move)];
     }
-
     list -> count++;
 }
 
 static void AddCaptureMove(const S_BOARD *pos, int move, S_MOVELIST *list) {
     ASSERT(SqOnBoard(FROMSQ(move)));
     ASSERT(SqOnBoard(TOSQ(move)));
+    ASSERT(CheckBoard(pos));
     ASSERT(PieceValid(CAPTURED(move)));
     
     list -> moves[list -> count].move = move;
@@ -120,6 +121,7 @@ static void AddWhitePawnCapMove(const S_BOARD *pos, const int from , const int t
     ASSERT(PieceValidEmpty(cap));
     ASSERT(SqOnBoard(to));
 	ASSERT(CheckBoard(pos));
+    ASSERT(CheckBoard(pos));
     
     if (RanksBrd[from] == RANK_7) {
         AddCaptureMove(pos, MOVE(from, to, cap, wQ, 0), list);
@@ -148,6 +150,7 @@ static void AddWhitePawnMove(const S_BOARD *pos, const int from, const int to, S
 
 static void AddBlackPawnCapMove(const S_BOARD *pos, const int from , const int to, const int cap, S_MOVELIST *list) {
     ASSERT(PieceValidEmpty(cap));
+    ASSERT(SqOnBoard(from));
     ASSERT(SqOnBoard(to));
 	ASSERT(CheckBoard(pos));
     
@@ -315,7 +318,6 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 }
             }
         }
-
         pce = LoopSlidePce[pceIndex++];
     }
 
@@ -347,7 +349,6 @@ void GenerateAllMoves(const S_BOARD *pos, S_MOVELIST *list) {
                 AddQuietMove(pos, MOVE(sq, t_sq, EMPTY, EMPTY, 0), list);
             }
         }
-
         pce = LoopNonSlidePce[pceIndex++];
     }
 }
@@ -475,3 +476,48 @@ void GenerateAllCaps(const S_BOARD *pos, S_MOVELIST *list) {
         pce = LoopNonSlidePce[pceIndex++];
     }
 }
+
+// //Check for illegal moves
+// int isKingInCheck(S_BOARD *board) {
+//     int kingSquare = board -> KingSq[board -> side];
+//     int opponentSide = (board -> side == WHITE) ? BLACK : WHITE;
+
+//     int directions[] = {-9, -11, 9, 11};
+//     for (int i = 0; i < 4; i++) {
+//         int attackSquare = kingSquare + directions[i];
+//         if (!SQOFFBOARD(attackSquare) && board -> pieces[attackSquare] == opponentSide + wP) {
+//             return TRUE;
+//         }
+//     }
+
+//     int knightOffsets[] = {-21, -19, 19, 21, -12, -8, 8, 12};
+//     for (int i = 0; i < 4; i++) {
+//         int attackSquare = kingSquare + knightOffsets[i];
+//         if (!SQOFFBOARD(attackSquare) && board -> pieces[attackSquare] == opponentSide + wN) {
+//             return TRUE;
+//         }
+//     }
+
+//     int pieceOffSets[] = {-1, 1, 10, -10, -9, 9, -11, 11};
+//     for (int i = 0; i < 8; i++) {
+//         int direction = pieceOffSets[i];
+//         int sq = kingSquare;
+//         while (!SQOFFBOARD(sq)) {
+//             sq += direction;
+//             if (board -> pieces[sq] == opponentSide + wQ || board->pieces[sq] == opponentSide + wR || board -> pieces[sq] == opponentSide + wB) {
+//                 return TRUE;
+//             }
+//             if (board -> pieces[sq] != EMPTY) break;
+//         }
+//     }
+
+//     int kingOffsets[] = {-1, 1, 10, -10, -9, 9, -11, 11};
+//     for (int i = 0; i < 8; i++) {
+//         int attackSquare = kingSquare + kingOffsets[i];
+//         if (!SQOFFBOARD(attackSquare) && board -> pieces[attackSquare] == opponentSide + wK) {
+//             return TRUE;
+//         }
+//     }
+
+//     return FALSE;
+// }

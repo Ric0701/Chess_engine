@@ -76,6 +76,7 @@ int CheckBoard(const S_BOARD *pos) {
     ASSERT(t_bigPce[WHITE] == pos -> bigPce[WHITE] && t_bigPce[BLACK] == pos -> bigPce[BLACK]);
 
     ASSERT(pos -> side == WHITE || pos -> side == BLACK);
+
     ASSERT(GeneratePosKey(pos) == pos -> posKey);
 
     ASSERT(pos -> enPas == NO_SQ || (RanksBrd[pos -> enPas] == RANK_6 && pos -> side == WHITE)
@@ -306,4 +307,46 @@ void PrintBoard(const S_BOARD *pos) {
 			pos -> castlePerm & BQCA ? 'q' : '-'
 			);
 	printf("PosKey:%llX\n", pos -> posKey);
+}
+
+void MirrorBoard(S_BOARD *pos) {
+    int tempPiecesArray[64];
+    int tempSide = pos -> side ^ 1;
+    int SwapPiece[13] = { EMPTY, bP, bN, bB, bR, bQ, bK, wP, wN, wB, wR, wQ, wK };
+    int tempCastlePerm = 0;
+    int tempEnPas = NO_SQ;
+
+    int sq;
+    int tp;
+
+    if (pos -> castlePerm & WKCA) tempCastlePerm |= BKCA;
+    if (pos -> castlePerm & WQCA) tempCastlePerm |= BQCA;
+
+    if (pos -> castlePerm & BKCA) tempCastlePerm |= WKCA;
+    if (pos -> castlePerm & BQCA) tempCastlePerm |= WQCA;
+
+    if (pos -> enPas != NO_SQ) {
+        tempEnPas = SQ120(Mirror64[SQ64(pos -> enPas)]);
+    }
+
+    for (sq = 0; sq < 64; sq++) {
+        tempPiecesArray[sq] = pos -> pieces[SQ120(Mirror64[sq])];
+    }
+
+    ResetBoard(pos);
+
+    for (sq = 0; sq < 64; sq++) {
+        tp = SwapPiece[tempPiecesArray[sq]];
+        pos -> pieces[SQ120(sq)] = tp;
+    }
+
+    pos -> side = tempSide;
+    pos -> castlePerm = tempCastlePerm;
+    pos -> enPas = tempEnPas;
+
+    pos -> posKey = GeneratePosKey(pos);
+
+    UpdateListsMaterials(pos);
+
+    ASSERT(CheckBoard(pos));
 }

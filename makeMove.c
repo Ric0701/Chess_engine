@@ -22,6 +22,7 @@ const int CastlePerm[120] = {
 
 static void ClearPiece(const int sq, S_BOARD *pos) {
     ASSERT(SqOnBoard(sq));
+    ASSERT(CheckBoard(pos));
 
     int pce = pos -> pieces[sq];
 
@@ -57,6 +58,7 @@ static void ClearPiece(const int sq, S_BOARD *pos) {
     }
 
     ASSERT(t_pceNum != -1);
+    ASSERT(t_pceNum >= 0 && t_pceNum < 10);
 
     pos -> pceNum[pce]--;
     pos -> pList[pce][t_pceNum] = pos -> pList[pce][pos -> pceNum[pce]];
@@ -231,6 +233,9 @@ void TakeMove(S_BOARD *pos) {
     pos -> hisPly--;
     pos -> ply--;
 
+    ASSERT(pos->hisPly >= 0 && pos->hisPly < MAXGAMEMOVES);
+	ASSERT(pos->ply >= 0 && pos->ply < MAXDEPTH);
+
     int move = pos -> history[pos -> hisPly].move;
     int from = FROMSQ(move);
     int to = TOSQ(move);
@@ -292,4 +297,51 @@ void TakeMove(S_BOARD *pos) {
     }
 
     ASSERT(CheckBoard(pos));
+}
+
+void MakeNullMove(S_BOARD *pos) {
+
+    ASSERT(CheckBoard(pos));
+    ASSERT(!SqAttacked(pos->KingSq[pos->side], pos->side^1, pos));
+
+    pos -> ply++;
+    pos -> history[pos->hisPly].posKey = pos -> posKey;
+
+    if (pos -> enPas != NO_SQ) HASH_EP;
+
+    pos -> history[pos -> hisPly].move = NO_MOVE;
+    pos -> history[pos -> hisPly].fiftyMove = pos -> fiftyMove;
+    pos -> history[pos -> hisPly].enPas = pos -> enPas;
+    pos -> history[pos -> hisPly].castlePerm = pos -> castlePerm;
+    
+    pos -> side ^= 1;
+    pos -> hisPly++;
+    HASH_SIDE;
+
+    ASSERT(CheckBoard(pos));
+    ASSERT(pos -> hisPly >= 0 && pos -> hisPly < MAXGAMEMOVES);
+    ASSERT(pos -> ply >= 0 && pos -> ply < MAXDEPTH);
+
+    return;
+}
+
+void TakeNullMove(S_BOARD *pos) {
+    ASSERT(CheckBoard(pos));
+
+    pos -> hisPly--;
+    pos -> ply--;
+
+    if (pos -> enPas != NO_SQ) HASH_EP;
+
+    pos -> castlePerm = pos -> history[pos -> hisPly].castlePerm;
+    pos -> fiftyMove = pos -> history[pos -> hisPly].fiftyMove;
+    pos -> enPas = pos -> history[pos -> hisPly].enPas;
+
+    if (pos -> enPas != NO_SQ) HASH_EP;
+    pos -> side ^= 1;
+    HASH_SIDE;
+
+    ASSERT(CheckBoard(pos));
+    ASSERT(pos -> hisPly >= 0 && pos -> hisPly < MAXGAMEMOVES);
+    ASSERT(pos -> ply >= 0 && pos -> ply < MAXDEPTH);
 }

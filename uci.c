@@ -1,5 +1,4 @@
 #include "defs.h"
-#include <string.h>
 
 #define INPUTBUFFER 400 * 6
 
@@ -8,6 +7,11 @@ void ParseGo(char* line, S_SEARCHINFO *info, S_BOARD *pos) {
     int time = -1, inc = 0;
     char *ptr = NULL;
     info -> timeSet = FALSE;
+
+    // if (pos->posKey == 0) { //ChatGPT
+    //     printf("No position received. Defaulting to startpos.\n");
+    //     Parse_FEN(START_FEN, pos);
+    // }
 
     if ((ptr = strstr(line, "infinite"))) {
         ; //Do nothing
@@ -56,13 +60,10 @@ void ParseGo(char* line, S_SEARCHINFO *info, S_BOARD *pos) {
         info -> stopTime = info -> startTime + time + inc;
     }
 
-    if (depth == -1) { //Deepseek modification
-        if (info -> timeSet) {
-            info -> depth = 64;
-        } else {
-            info -> depth = MAXDEPTH;
-        }
+    if (depth == -1) {
+        info -> depth = MAXDEPTH;
     }
+    
 
     printf("time: %d start: %d stop: %d depth: %d timeset: %d\n", time, info->startTime, info->stopTime, info->depth, info->timeSet);
     SearchPosition(pos, info);
@@ -91,9 +92,9 @@ void ParsePosition(char* lineIn, S_BOARD *pos) {
         ptrChar += 6;
         while (*ptrChar) {
             move = ParseMove(ptrChar, pos);
-            if (move == NO_MOVE) break;
-            
-            MakeMove(pos, move);
+                ASSERT(move != NO_MOVE); //Debug
+                if (move == NO_MOVE) break;
+                MakeMove(pos, move);
             pos -> ply = 0;
             while(*ptrChar && *ptrChar!= ' ') ptrChar++;
             ptrChar++;
@@ -102,7 +103,7 @@ void ParsePosition(char* lineIn, S_BOARD *pos) {
     PrintBoard(pos);
 }
 
-void UCI_Loop() {
+void UCI_Loop(S_BOARD *pos, S_SEARCHINFO *info) {
     setbuf(stdin, NULL);
     setbuf(stdout, NULL);
 
@@ -111,22 +112,20 @@ void UCI_Loop() {
     printf("id author %s\n", AUTHOR);
     printf("uciok\n");
 
-    S_BOARD pos[1];
-    S_SEARCHINFO info[1];
+    // S_BOARD pos[1];
+    // S_SEARCHINFO info[1];
 
-    pos->PvTable = malloc(sizeof(S_PVTABLE)); //chatgpt
+    // pos->PvTable = malloc(sizeof(S_PVTABLE)); //chatgpt
     InitPvTable(pos -> PvTable);
 
     while (TRUE) {
-        memset(&line[0], 0, sizeof(line));
+		memset(&line[0], 0, sizeof(line));
         fflush(stdout);
-        if (!fgets(line, INPUTBUFFER, stdin)) {
-            continue;
-        }
+        if (!fgets(line, INPUTBUFFER, stdin))
+        continue;
 
-        if (line [0] == '\n') {
-            continue;
-        }
+        if (line[0] == '\n')
+        continue;
 
         if (!strncmp(line, "isready", 7)) {
             printf("readyok\n");
@@ -138,16 +137,14 @@ void UCI_Loop() {
         } else if (!strncmp(line, "go", 2)) {
             ParseGo(line, info, pos);
         } else if (!strncmp(line, "quit", 4)) {
-            info -> quit = TRUE;
+            info->quit = TRUE;
             break;
         } else if (!strncmp(line, "uci", 3)) {
-            printf("id name %s\n", NAME);
+            printf("id name %s\n",NAME);
             printf("id author %s\n", AUTHOR);
             printf("uciok\n");
-        }
-        if (info -> quit) {
-            break;
+		if(info->quit) break;
         }
     }
-    free(pos -> PvTable -> pTable);
+    // free(pos -> PvTable -> pTable);
 }

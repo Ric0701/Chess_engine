@@ -1,4 +1,8 @@
+//Fix this: https://chatgpt.com/s/t_6895ddf9e3fc81919d1fd855b9e4202e
+
 #include "defs.h"
+
+int rootDepth;
 
 static void CheckUp(S_SEARCHINFO *info) {
     // Timer check up
@@ -7,6 +11,8 @@ static void CheckUp(S_SEARCHINFO *info) {
     if (info -> timeSet == TRUE && GetTimeMs() > info -> stopTime) {
         info -> stopped = TRUE;
     }
+
+    ReadInput(info);
 }
 
 static void PickNextMove(int moveNum, S_MOVELIST *list) {
@@ -78,7 +84,7 @@ static int QuietHorizon(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
         return 0;
     }
 
-    if (pos -> ply > MAXDEPTH - 3) {
+    if (pos -> ply > MAXDEPTH - 1) { //Change from 3 to 1
         return EvalPosition(pos);
     }
 
@@ -97,10 +103,10 @@ static int QuietHorizon(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 
     int MoveNum = 0;
     int Legal = 0;
-    int OldAlpha = alpha;
-    int BestMove = NO_MOVE;
+    // int OldAlpha = alpha;
+    // int BestMove = NO_MOVE;
     Score = -INFINITE;
-    int PvMove = ProbePvTable(pos);
+    // int PvMove = ProbePvTable(pos);
 
     for (MoveNum = 0; MoveNum < list -> count; ++MoveNum) {
         PickNextMove(MoveNum, list);
@@ -127,21 +133,23 @@ static int QuietHorizon(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
                 return beta;
             }
             alpha = Score;
-            BestMove = list -> moves[MoveNum].move;
+            // BestMove = list -> moves[MoveNum].move;
         }
     }
 
-    if (alpha != OldAlpha) {
-        StorePvMove(pos, BestMove);
-    }
+    // if (alpha != OldAlpha) {
+    //     StorePvMove(pos, BestMove);
+    // }
 
     return alpha;
 }
 
 static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO *info, int DoNull) {
+    //Fix this: https://chatgpt.com/s/t_6897084fb7ac819183bd9d24c3bf25e4
+    
     ASSERT(CheckBoard(pos));
 
-    if (depth == 0) {
+    if (depth <= 0) {
         return QuietHorizon(alpha, beta, pos, info);
         // return EvalPosition(pos);
     }
@@ -152,13 +160,36 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
     
     info -> nodes++;
 
-    if (IsRepetition(pos) || pos -> fiftyMove >= 100) {
+    if ((IsRepetition(pos) || pos -> fiftyMove >= 100) && pos->ply) {
         return 0;
     }
 
     if (pos -> ply > MAXDEPTH - 1) {
         return EvalPosition(pos);
     }
+
+    int InCheck = SqAttacked(pos->KingSq[pos->side], pos->side^1, pos);
+
+    if(InCheck == TRUE) {
+		depth++;
+	}
+
+    int Score = -INFINITE;
+    int PvMove = ProbePvTable(pos);
+
+    // if( DoNull && !InCheck && pos->ply && (pos->bigPce[pos->side] > 0) && depth >= 4) {
+	// 	MakeNullMove(pos);
+	// 	Score = -AlphaBeta( -beta, -beta + 1, depth-4, pos, info, FALSE);
+	// 	TakeNullMove(pos);
+	// 	if(info->stopped == TRUE) {
+	// 		return 0;
+	// 	}
+
+	// 	if (Score >= beta && abs(Score) < ISMATE) {
+	// 		info->nullCut++;
+	// 		return beta;
+	// 	}
+	// }
 
     S_MOVELIST list[1];
     GenerateAllMoves(pos, list);
@@ -167,13 +198,16 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
     int Legal = 0;
     int OldAlpha = alpha;
     int BestMove = NO_MOVE;
-    int Score = -INFINITE;
-    int PvMove = ProbePvTable(pos);
+
+    int BestScore = -INFINITE;
+
+    Score = -INFINITE;
 
     if (PvMove != NO_MOVE) {
         for (MoveNum = 0; MoveNum < list -> count; ++MoveNum) {
             if (list -> moves[MoveNum].move == PvMove) {
                 list -> moves[MoveNum].score = 50; // Can change if needed
+                // printf("Pv move found \n"); //Debug
                 break;
             }
         }
@@ -193,33 +227,37 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
             return 0;
         }
 
-        if (Score > alpha) {
-            if (Score >= beta) {
-                if (Legal == 1) {
-                    info -> fhf++;
+        if (Score > BestScore) {
+            BestScore = Score;
+            BestMove = list -> moves[MoveNum].move;
+            if (Score > alpha) {
+                if (Score >= beta) {
+                    if (Legal == 1) {
+                        info -> fhf++;
+                    }
+                    info -> fh++;
+
+                    if (!(list -> moves[MoveNum].move & MFLAG_CAP)) {
+                        pos -> searchKillers[1][pos -> ply] = pos -> searchKillers[0][pos -> ply];
+                        pos -> searchKillers[0][pos -> ply] = list -> moves[MoveNum].move;
+                    }
+
+                    return beta;
                 }
-                info -> fh++;
+                alpha = Score;
+                BestMove = list -> moves[MoveNum].move;
 
                 if (!(list -> moves[MoveNum].move & MFLAG_CAP)) {
-                    pos -> searchKillers[1][pos -> ply] = pos -> searchKillers[0][pos -> ply];
-                    pos -> searchKillers[0][pos -> ply] = list -> moves[MoveNum].move;
-                }
+                    pos -> searchHistory[pos -> pieces[FROMSQ(BestMove)]][TOSQ(BestMove)] += depth;
+                } 
 
-                return beta;
             }
-            alpha = Score;
-            BestMove = list -> moves[MoveNum].move;
-
-            if (!(list -> moves[MoveNum].move & MFLAG_CAP)) {
-                pos -> searchHistory[pos -> pieces[FROMSQ(BestMove)]][TOSQ(BestMove)] += depth;
-            } 
-
         }
     }
 
     if (Legal == 0) {
-        if (SqAttacked(pos -> KingSq[pos -> side], pos -> side ^ 1, pos)) {
-            return -ISMATE + pos -> ply; //SUS
+        if (InCheck) {
+            return -INFINITE + pos -> ply; //SUS
         } else {
             return 0;
         }
@@ -241,27 +279,49 @@ void SearchPosition(S_BOARD *pos, S_SEARCHINFO *info) {
     ClearForSearch(pos, info);
 
     //Iterative deepening
-    for (currentDepth = 1; currentDepth <= info -> depth; ++currentDepth) {
-        bestScore = AlphaBeta(-INFINITE, INFINITE, currentDepth, pos, info, TRUE);
-        
-        if (info -> stopped == TRUE) {
-            break;
-        }
-        
-        pvMoves = GetPvLine(currentDepth, pos);
-        bestMove = pos -> PvArray[0];
+    if (bestMove == NO_MOVE) {
+        for (currentDepth = 1; currentDepth <= info -> depth; ++currentDepth) {
+            
+            rootDepth = currentDepth;
+            bestScore = AlphaBeta(-INFINITE, INFINITE, currentDepth, pos, info, TRUE);
+            
+            if (info -> stopped == TRUE) {
+                break;
+            }
+            
+            pvMoves = GetPvLine(currentDepth, pos);
+            bestMove = pos -> PvArray[0];
 
-        printf("info score cp %d depth %d nodes %ld time %d ", 
-            bestScore, currentDepth, info -> nodes, GetTimeMs() - info->startTime);
-        pvMoves = GetPvLine(currentDepth, pos);
-        printf("pv");
-        for (pvNum = 0; pvNum < pvMoves; ++pvNum) {
-            printf(" %s", PrintMove(pos -> PvArray[pvNum]));
+            if (info -> GAME_MODE == UCIMODE) {
+                printf("info score cp %d depth %d nodes %ld time %d ", 
+                    bestScore, currentDepth, info->nodes, GetTimeMs()-info->startTime);
+            } else if (info -> GAME_MODE == XBOARDMODE && info -> POST_THINKING == TRUE) {
+                printf("%d %d %d %ld ",
+                    currentDepth, bestScore, (GetTimeMs()-info->startTime)/10, info->nodes);
+            } else if (info -> POST_THINKING == TRUE) {
+                printf("score:%d depth:%d nodes:%ld time:%d(ms) ",
+                    bestScore, currentDepth, info->nodes, GetTimeMs()-info->startTime);
+            }
+            if (info -> GAME_MODE == UCIMODE || info -> POST_THINKING == TRUE) {
+                pvMoves = GetPvLine(currentDepth, pos);
+                printf("pv");
+                for (pvNum = 0; pvNum < pvMoves; ++pvNum) {
+                        printf(" %s", PrintMove(pos -> PvArray[pvNum]));
+                }
+                printf("\n");
+            }
         }
-        printf("\n");
-        // printf("Ordering: %.2f\n", (info->fhf / info->fh));
     }
 
     //Best Move
-    printf("bestmove %s\n", PrintMove(bestMove));
+    if (info -> GAME_MODE == UCIMODE) {
+        printf("bestmove %s\n", PrintMove(bestMove));
+    } else if (info -> GAME_MODE == XBOARDMODE) {
+        printf("move %s\n", PrintMove(bestMove));
+        MakeMove(pos, bestMove);
+    } else {
+        printf("\n\n***!! %s makes move %s !!***\n\n", NAME, PrintMove(bestMove));
+        MakeMove(pos, bestMove);
+        PrintBoard(pos);
+    }
 }

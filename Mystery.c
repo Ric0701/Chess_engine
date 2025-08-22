@@ -1,6 +1,6 @@
-//https://www.youtube.com/watch?v=gVGadWuBqEA&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=70
+//https://www.youtube.com/watch?v=4ozHuSRDyfE&list=PLZ1QII7yudbc-Ky058TEaOstZHVbT-2hg&index=82
 //Time: 0:00
-//Chapter: 70
+//Chapter: 82
 
 //Vice Engine Source Code: https://github.com/bluefeversoft/vice/tree/main/Vice11/src
 #include "defs.h"
@@ -28,209 +28,45 @@
 #define Mate3byBlack "5rk1/1p4pp/2p5/p2p4/3Pn3/1Pq5/PK6/2B5 w - - 0 32"
 #define M2 "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w Q - 0 1"
 #define M5 "6k1/3b3r/1p1p4/p1n2p2/1PPNpP1q/P3Q1p1/1R1RB1P1/5K2 b - - 0-1"
-#define pos "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1"
+#define random "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1"
+#define bugtest "3rr3/pp4k1/2p2bQ1/3n3p/3p4/3B4/1qPB1PPP/RR4K1 b - - 0 1"
 
 int main() {
     AllInit();
 
-    UCI_Loop();
+    S_BOARD pos[1];
+    S_SEARCHINFO info[1];
+    InitPvTable(pos -> PvTable);
+
+    printf("Welcome to %s! Type '%s' for console mode -> \n", NAME, NAME);
+
+    char line[256];
+	while (TRUE) {
+		memset(&line[0], 0, sizeof(line));
+
+		fflush(stdout);
+		if (!fgets(line, 256, stdin))
+			continue;
+		if (line[0] == '\n')
+			continue;
+		if (!strncmp(line, "uci",3)) {
+			UCI_Loop(pos, info);
+			if(info->quit == TRUE) break;
+			continue;
+		} else if (!strncmp(line, "xboard",6))	{
+			XBoard_Loop(pos, info);
+			if(info->quit == TRUE) break;
+			continue;
+		} else if (!strncmp(line, NAME, 7))	{
+			Console_Loop(pos, info);
+			if(info->quit == TRUE) break;
+			continue;
+		} else if(!strncmp(line, "quit", 4))	{
+			break;
+		}
+	}
+
+    free(pos -> PvTable -> pTable);
 
     return 0;
 }
-
-    // Display Board position (For viewing chess board position for 10x12 and 8x8)
-    // int index = 0;
-
-    // for (index = 0; index < BRD_SQ_NUM; ++index) {
-    //     if (index % 10 == 0) printf("\n");
-    //     printf("%5d", Sq120ToSq64[index]);
-    // }
-
-    // printf("\n");
-    // printf("\n");
-
-    // for (index = 0; index < 64; ++index) {
-    //     if (index % 8 == 0) printf("\n");
-    //     printf("%5d", Sq64ToSq120[index]);
-    // }
-
-    // printf("\n");
-    
-
-    //Showing Pawn adding position on board
-    // U64 playBitBoard = 0ULL;
-
-    // printf("Start: \n\n");
-    // PrintBitBoard(playBitBoard);
-
-    // playBitBoard |= (1ULL << SQ64(D2));
-    // printf("D2 Added: \n\n");
-    // PrintBitBoard(playBitBoard);
-
-    // playBitBoard |= (1ULL << SQ64(F4));
-    // printf("F4 Added: \n\n");
-    // PrintBitBoard(playBitBoard);
-
-    // int index = 0;
-    // U64 playBitBoard = 0ULL;
-
-    // for (index = 0; index < 64; index++) {
-    //     printf("Index: %d\n", index);
-    //     PrintBitBoard(ClearMask[index]);
-    //     printf("\n");
-    // }
-
-    // SETBIT(playBitBoard, 61);
-    // PrintBitBoard(playBitBoard);
-
-    // CLRBIT(playBitBoard, 61);
-    // PrintBitBoard(playBitBoard);
-
-
-    // int Piece1 = rand();
-    // int Piece2 = rand();
-    // int Piece3 = rand();
-    // int Piece4 = rand();
-
-    // printf("Piece 1: %X\n", Piece1);
-    // printf("Piece 2: %X\n", Piece2);
-    // printf("Piece 3: %X\n", Piece3);
-    // printf("Piece 4: %X\n", Piece4);
-
-    // int key = Piece1 ^ Piece2 ^ Piece3 ^ Piece4;
-    // int TempKey = Piece2;
-    // TempKey ^= Piece3;
-    // TempKey ^= Piece4;
-    // TempKey ^= Piece1;
-
-    // printf("Key: %X\n", key);
-    // printf("TempKey: %X\n", TempKey);
-
-    // TempKey ^= Piece3;
-    // printf("(Three out) TempKey: %X\n", TempKey);
-
-    // TempKey ^= Piece3;
-    // printf("(Three in again) TempKey: %X\n", TempKey);
-
-
-
-    // printf("\nwP: \n");
-    // PrintBitBoard(board -> pawns[WHITE]);
-    // printf("\nbP: \n");
-    // PrintBitBoard(board -> pawns[BLACK]);
-    // printf("\nall Pawns: \n");
-    // PrintBitBoard(board -> pawns[BOTH]);
-
-
-
-    // void ShowSqAtBySide(const int side, const S_BOARD *pos) {
-    //     int rank = 6; int file = 0; int sq = 0; 
-    //     printf("\n\nSquares attacked by:%c\n",SideChar[side]);
-    //     for (rank = RANK_8; rank >= RANK_1; --rank) {
-    //         for (file = FILE_A; file <= FILE_H; ++file) {
-    //             sq = FR2SQ(file, rank);
-    //             if (SqAttacked(sq, side, pos) == TRUE) {
-    //                 printf("x");
-    //             } else {
-    //                 printf("-");
-    //             }
-    //         }
-    //         printf("\n");
-    //     }
-    //     printf("\n\n");
-    // }
-
-
-    // void PrintBin(int move) {
-    //     int index = 0;
-    //     printf("As binary: \n");
-    //     for (index = 27; index >= 0; index--) {
-    //         if ((1 << index) & move) printf("1");
-    //         else printf("0");
-    //         if (index != 20 && index%4 == 0) printf(" ");
-    //     }
-    //     printf("\n");
-    // }
-
-
-
-
-    // int move = 0;
-    // int from = A2; int to = H7;
-    // int cap = wR; int prom = bK;
-
-    // move = ( ( from ) | (to << 7) | (cap << 14) | (prom << 20) );
-
-    // // printf("\ndec: %d hex: %X\n", move, move);
-    // // PrintBin(move);
-
-    // printf("From: %d to: %d cap: %d prom: %d\n",
-    //     FROMSQ(move), TOSQ(move), CAPTURED(move),
-    //     PROMOTED(move));
-
-    // // move |= MFLAG_PS;
-    // // printf("is PST: %s\n", (move & MFLAG_PS) ? "YES":"NO");
-
-    // printf("Algebraic from: %s\n", PrintSq(from));
-    // printf("Algebraic to: %s\n", PrintSq(to));
-    // printf("Algebraic move: %s\n", PrintMove(move));
-
-
-
-    // int IsRepetition(const S_BOARD *pos) {
-    //     int index = 0;
-
-    //     for (index = 0; index < pos -> hisPly-1; ++index) {
-    //         if (pos -> posKey == pos -> history[index].posKey) {
-    //             return TRUE;
-    //         }
-    //     }
-    //     return FALSE;
-    // }
-
-
-
-    // S_BOARD board[1] = {0};
-    // InitPvTable(board -> PvTable);
-    // S_PVENTRY pvTable;
-    // S_MOVELIST list[1];
-    // S_SEARCHINFO info[1];
-    // InitPvTable(&board[0].PvTable[0]); //ChatGPT
-
-    // Parse_FEN(M5, board);
-    // // PerftTest(6, board);
-    // printf("FEN parsed.\n");
-
-    // char input[6];
-    // int Move = NO_MOVE;
-    // int PvNum = 0;
-    // int Max = 0;
-
-    // while (TRUE) {
-    //     PrintBoard(board);
-    //     printf("Please enter a move > ");
-    //     fgets(input, 6, stdin);
-
-    //     if (input[0] == 'q') {
-    //         break;
-    //     } else if (input[0] == 't') {
-    //         TakeMove(board);
-    //     } else if (input[0] == 's') {
-    //         info -> depth = 10;
-    //         info -> startTime = GetTimeMs();
-    //         info -> stopTime = GetTimeMs() + 200000;
-    //         SearchPosition(board, info);
-    //     } else {
-    //         Move = ParseMove(input, board);
-    //         if (Move != NO_MOVE) {
-    //             StorePvMove(board, Move);
-    //             MakeMove(board, Move);
-    //         } else {
-    //             printf("Move Not Parsed: %s\n", input);
-    //         }
-    //     }
-
-    //     fflush(stdin);
-    // }
-    // 
-    // free(board -> PvTable -> pTable);

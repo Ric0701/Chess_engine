@@ -44,6 +44,8 @@ int ParseMove(char *ptrChar, S_BOARD *pos) {
     if (ptrChar[0] > 'h' || ptrChar[0] < 'a') return FALSE;
     if (ptrChar[2] > 'h' || ptrChar[2] < 'a') return FALSE;
     
+    ptrChar[strcspn(ptrChar, "\r\n")] = '\0';
+
     int from = FR2SQ(ptrChar[0] - 'a', ptrChar[1] - '1');
     int to = FR2SQ(ptrChar[2] - 'a', ptrChar[3] - '1');
 
@@ -60,7 +62,7 @@ int ParseMove(char *ptrChar, S_BOARD *pos) {
         if (FROMSQ(Move) == from && TOSQ(Move) == to) {
             PromPce = PROMOTED(Move);
             if (PromPce != EMPTY) {
-                if (IsRQ(PromPce) && !IsRQ(PromPce) && ptrChar[4] == 'r') {
+                if (IsRQ(PromPce) && !IsBQ(PromPce) && ptrChar[4] == 'r') {
                     return Move;
                 } else if (!IsRQ(PromPce) && IsBQ(PromPce) && ptrChar[4] == 'b') {
                     return Move;
