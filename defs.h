@@ -36,7 +36,7 @@ typedef unsigned long long U64;
 
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-#define INFINITE 200
+#define INFINITE 200000
 #define ISMATE (INFINITE - MAXDEPTH)
 
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
@@ -122,7 +122,7 @@ typedef struct S_BOARD {
     //Piece List (Maximum 10 pieces for a piece set like pawn) - https://chatgpt.com/s/t_686fd9f539fc8191b87e12cf9425a46b
     int pList[13][10];
 
-    S_PVTABLE *PvTable;
+    S_PVTABLE PvTable[1];
     int PvArray[MAXDEPTH];
 
     int searchHistory[13][BRD_SQ_NUM];

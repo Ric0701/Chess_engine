@@ -96,10 +96,6 @@ void InitEvalMasks() {
             }
         }
     }
-
-    // for (sq = 0; sq < 64; ++sq) {
-    //     PrintBitBoard(IsolatePawnMask[sq]);
-    // }
 }
 
 void InitFilesRankBrd() {

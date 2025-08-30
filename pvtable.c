@@ -44,16 +44,9 @@ void InitPvTable(S_PVTABLE *table) {
 
     table -> numEntries = PvSize / sizeof(S_PVENTRY);
     table -> numEntries -= 2;
-    
-    static bool firstInit = true; //Deepseek
-    if (firstInit) {
-        table->pTable = NULL;
-        firstInit = false;
-    }
 
     if (table -> pTable != NULL) {
         free(table -> pTable);
-        table->pTable = NULL; //ChatGpt
     }
 
     table -> pTable = (S_PVENTRY *) malloc(table -> numEntries * sizeof(S_PVENTRY));

@@ -35,6 +35,7 @@ int main() {
     AllInit();
 
     S_BOARD pos[1];
+	memset(pos, 0, sizeof(S_BOARD)); //Grok
     S_SEARCHINFO info[1];
     InitPvTable(pos -> PvTable);
 

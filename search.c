@@ -145,13 +145,14 @@ static int QuietHorizon(int alpha, int beta, S_BOARD *pos, S_SEARCHINFO *info) {
 }
 
 static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO *info, int DoNull) {
+    // printf("AlphaBeta depth:%d alpha:%d beta:%d\n", depth, alpha, beta);
     //Fix this: https://chatgpt.com/s/t_6897084fb7ac819183bd9d24c3bf25e4
     
     ASSERT(CheckBoard(pos));
 
     if (depth <= 0) {
-        return QuietHorizon(alpha, beta, pos, info);
-        // return EvalPosition(pos);
+        // return QuietHorizon(alpha, beta, pos, info);
+        return EvalPosition(pos);
     }
 
     if ((info -> nodes & 2047) == 0) {
@@ -207,7 +208,6 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
         for (MoveNum = 0; MoveNum < list -> count; ++MoveNum) {
             if (list -> moves[MoveNum].move == PvMove) {
                 list -> moves[MoveNum].score = 50; // Can change if needed
-                // printf("Pv move found \n"); //Debug
                 break;
             }
         }
@@ -264,7 +264,12 @@ static int AlphaBeta(int alpha, int beta, int depth, S_BOARD *pos, S_SEARCHINFO 
     }
 
     if (alpha != OldAlpha) {
+        // printf("StorePvMove Best Move:%s Score:%d\n", PrintMove(BestMove), BestScore);
         StorePvMove(pos, BestMove);
+        int testGetMove = ProbePvTable(pos);
+        if (testGetMove != BestMove) {
+            printf("Error in PvTable\n");
+        }
     }
 
     return alpha;

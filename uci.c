@@ -8,11 +8,6 @@ void ParseGo(char* line, S_SEARCHINFO *info, S_BOARD *pos) {
     char *ptr = NULL;
     info -> timeSet = FALSE;
 
-    // if (pos->posKey == 0) { //ChatGPT
-    //     printf("No position received. Defaulting to startpos.\n");
-    //     Parse_FEN(START_FEN, pos);
-    // }
-
     if ((ptr = strstr(line, "infinite"))) {
         ; //Do nothing
     }
@@ -112,10 +107,6 @@ void UCI_Loop(S_BOARD *pos, S_SEARCHINFO *info) {
     printf("id author %s\n", AUTHOR);
     printf("uciok\n");
 
-    // S_BOARD pos[1];
-    // S_SEARCHINFO info[1];
-
-    // pos->PvTable = malloc(sizeof(S_PVTABLE)); //chatgpt
     InitPvTable(pos -> PvTable);
 
     while (TRUE) {
